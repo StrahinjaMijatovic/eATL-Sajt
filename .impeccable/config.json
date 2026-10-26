@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "tight-leading",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-24T12:06:53.361Z",
+        "reason": "model: display headings set at ~1.0 leading by design; body copy is 1.6"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-24T12:06:53.549Z",
+        "reason": "model: section children are inset by .wrap / gutter padding; detector reads section bg edge"
+      }
+    ]
+  }
+}

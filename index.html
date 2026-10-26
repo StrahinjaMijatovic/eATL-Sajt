@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>eATL — Electronic Aircraft Technical Log</title>
+  <meta name="description" content="eATL replaces the paper Aircraft Technical Log. Offline in the cockpit, QR-confirmed aircraft, hash-chained signatures, blocking validation and automatic PDF delivery to CAMO.">
+  <meta name="theme-color" content="#050E1A">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/icon.png">
+  <meta property="og:title" content="eATL — Electronic Aircraft Technical Log">
+  <meta property="og:description" content="The tech log, without the paper.">
+  <meta property="og:image" content="assets/eATL-%20New%20Icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=Geist:wght@300..700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <!-- Shared drawings: Cessna Citation 560XL in plan view, to scale (16.98 m span, 15.79 m length; 1 m = 33 units) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="jetBody" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0" stop-color="#8d9bab"/><stop offset=".12" stop-color="#c3ccd7"/><stop offset=".36" stop-color="#fbfcfd"/><stop offset=".5" stop-color="#f3f6f9"/><stop offset=".78" stop-color="#d4dce5"/><stop offset="1" stop-color="#8794a5"/>
+      </linearGradient>
+      <linearGradient id="jetWing" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stop-color="#fdfeff"/><stop offset=".3" stop-color="#eef2f6"/><stop offset="1" stop-color="#cbd4de"/>
+      </linearGradient>
+      <linearGradient id="jetRootShade" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0" stop-color="#1a2c44" stop-opacity=".32"/><stop offset="1" stop-color="#1a2c44" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="jetNacelle" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0" stop-color="#97a5b5"/><stop offset=".3" stop-color="#f7f9fb"/><stop offset=".55" stop-color="#e6ebf1"/><stop offset="1" stop-color="#8e9cad"/>
+      </linearGradient>
+      <linearGradient id="jetGlass" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stop-color="#3b5878"/><stop offset=".5" stop-color="#0f2236"/><stop offset="1" stop-color="#07121f"/>
+      </linearGradient>
+      <radialGradient id="jetIntake" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#5a6878"/><stop offset=".35" stop-color="#26313e"/><stop offset="1" stop-color="#0c131c"/>
+      </radialGradient>
+
+      <!-- one side of the aircraft (right, seen from above); mirrored for the left -->
+      <g id="jetHalf">
+        <!-- wing: near-straight leading edge, tapered, fillet into the fuselage -->
+        <path class="j-wing" d="M329 234 C333 249 340 258 352 261 L574 276 C580 277 583 284 583 292 L582 310 C582 315 578 318 573 318 L360 352 C347 354 337 359 329 368 Z"/>
+        <path fill="url(#jetRootShade)" opacity=".6" d="M329 240 C333 251 339 258 350 262 L352 356 C342 358 335 362 329 368 Z"/>
+        <!-- flaps, spoilers, aileron -->
+        <path class="j-flap" d="M346 338.5 L470 319 L470 334.4 L346 354.2 Z"/>
+        <path class="j-spoiler" d="M372 326 L452 314 L452 320 L372 332 Z"/>
+        <path class="j-aileron" d="M480 320.5 L558 308.5 L558 320.4 L480 332.8 Z"/>
+        <!-- spars, ribs, access panels -->
+        <path class="j-panel" d="M338 276 L570 287 M346 338.5 L558 307.5 M410 280 L410 330 M470 283 L470 319 M520 285 L520 314"/>
+        <circle class="j-cap" cx="498" cy="297" r="3.2"/>
+        <!-- static wicks -->
+        <path class="j-wick" d="M538 315 l2 9 M550 313 l2 9 M562 311 l2 9"/>
+        <!-- nav and strobe at the tip -->
+        <circle class="j-strobe" cx="581" cy="312" r="1.8"/>
+        <!-- engine pylon and PW545 nacelle on the aft fuselage -->
+        <path class="j-pylon" d="M326 400 L348 406 L348 454 L323 462 Z"/>
+        <path class="j-engine" d="M347 389 C347 381 354 378 362 378 C370 378 377 381 377 389 L379 418 C379.5 440 378 458 375 470 L372 478 L352 478 L349 470 C346 458 344.5 440 345 418 Z"/>
+        <path class="j-stripe" d="M346.2 398 L377.8 398 L378.6 408 L345.4 408 Z"/>
+        <ellipse class="j-intake" cx="362" cy="381.5" rx="13" ry="3.6"/>
+        <path class="j-panel" d="M346 430 H378 M348 462 H376"/>
+        <path class="j-exhaust" d="M352.5 477 L371.5 477 L369 487 L355 487 Z"/>
+        <!-- horizontal stabiliser (cruciform, mid-fin) with elevator -->
+        <path class="j-wing" d="M302 498 L404 555 C408 557 410 561 409.5 566 L408.5 579 C408 583 404 584.5 400 584 L302 558 Z"/>
+        <path class="j-elevator" d="M304 541 L404 574.5 L403 583.5 L304 557.5 Z"/>
+        <path class="j-wick" d="M392 582 l1 8 M380 579 l1 8"/>
+      </g>
+    </defs>
+  </svg>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="jet" viewBox="0 0 600 640">
+        <use href="#jetHalf"/>
+        <use href="#jetHalf" transform="matrix(-1 0 0 1 600 0)"/>
+        <!-- fuselage: radome, constant cabin section, aft taper to the tail cone -->
+        <path class="j-body" d="M300 48 C311 49 320 62 325 86 C328.5 104 330 128 330 158 L330 380 C330 428 324 482 313 528 C309 543 305 551 300 553 C295 551 291 543 287 528 C276 482 270 428 270 380 L270 158 C270 128 271.5 104 275 86 C280 62 289 49 300 48 Z"/>
+        <path class="j-panel" d="M282 76 Q300 70 318 76 M271 168 H329 M270.5 262 H329.5 M270.5 368 H329.5 M276 470 H324"/>
+        <!-- windshield (two panes) and cockpit side windows -->
+        <path fill="url(#jetGlass)" d="M281 123 Q300 111 319 123 L323.5 147 Q300 139 276.5 147 Z"/>
+        <path d="M300 117 V141" stroke="#c9d3de" stroke-width="1.6"/>
+        <path d="M284 122 Q291 117 297 116 L295 121 Q290 122 286 126 Z" fill="#fff" opacity=".35"/>
+        <path class="j-glass" d="M272 150 L276 149 L276 162 L271.5 163 Z M328 150 L324 149 L324 162 L328.5 163 Z"/>
+        <!-- cabin windows, seven per side -->
+        <g class="j-windows">
+          <ellipse cx="271" cy="184" rx="1.1" ry="4.2"/><ellipse cx="271" cy="208" rx="1.1" ry="4.2"/><ellipse cx="271" cy="232" rx="1.1" ry="4.2"/><ellipse cx="271" cy="256" rx="1.1" ry="4.2"/><ellipse cx="271" cy="280" rx="1.1" ry="4.2"/><ellipse cx="271" cy="304" rx="1.1" ry="4.2"/><ellipse cx="271" cy="328" rx="1.1" ry="4.2"/>
+          <ellipse cx="329" cy="184" rx="1.1" ry="4.2"/><ellipse cx="329" cy="208" rx="1.1" ry="4.2"/><ellipse cx="329" cy="232" rx="1.1" ry="4.2"/><ellipse cx="329" cy="256" rx="1.1" ry="4.2"/><ellipse cx="329" cy="280" rx="1.1" ry="4.2"/><ellipse cx="329" cy="304" rx="1.1" ry="4.2"/><ellipse cx="329" cy="328" rx="1.1" ry="4.2"/>
+        </g>
+        <!-- cabin door (left), emergency exit over the right wing -->
+        <path class="j-panel" d="M270.5 170 H276 V202 H270.5 M329.5 286 H325 V306 H329.5"/>
+        <!-- antennas on the spine, pitot probes -->
+        <ellipse class="j-antenna" cx="300" cy="196" rx="1.6" ry="6"/>
+        <ellipse class="j-antenna" cx="300" cy="352" rx="1.6" ry="6"/>
+        <ellipse class="j-antenna" cx="300" cy="430" rx="1.4" ry="5"/>
+        <path class="j-probe" d="M277 102 h-6 M323 102 h6"/>
+        <!-- dorsal fin and vertical fin top (sits above the stabiliser) -->
+        <path class="j-fin" d="M300 412 C302.5 440 305.5 500 305.5 548 L304 581 L296 581 L294.5 548 C294.5 500 297.5 440 300 412 Z"/>
+        <path class="j-stripe" d="M295 560 H305 L304.3 578 H295.7 Z"/>
+        <circle class="j-beacon" cx="300" cy="530" r="3"/>
+        <circle class="j-nav j-nav--white" cx="300" cy="582" r="2.4"/>
+        <circle class="j-nav j-nav--red" cx="17.5" cy="296" r="3.4"/><circle class="j-nav j-nav--green" cx="582.5" cy="296" r="3.4"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <header class="nav" data-nav>
+    <a class="nav__brand" href="#top" aria-label="eATL home">
+      <img src="assets/app-mark.png" alt="" width="34" height="34">
+      <span>eATL</span>
+    </a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#lifecycle">How it works</a>
+      <a href="#trust">Integrity</a>
+      <a href="#screens">Screens</a>
+      <a href="#roles">Roles</a>
+    </nav>
+    <a class="btn btn--primary btn--sm" href="#contact" data-mail>Contact us</a>
+  </header>
+
+  <main id="main">
+    <!-- ============ HERO ============ -->
+    <section class="hero" id="top" data-hero>
+      <div class="hero__stage">
+        <svg class="apron" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <pattern id="slabs" width="160" height="160" patternUnits="userSpaceOnUse">
+              <path d="M160 0 V160 H0" fill="none" stroke="rgba(170,196,226,.09)" stroke-width="2"/>
+            </pattern>
+            <radialGradient id="flood" cx="50%" cy="50%" r="50%">
+              <stop offset="0" stop-color="#5d86b8" stop-opacity=".42"/><stop offset=".45" stop-color="#2a4a73" stop-opacity=".22"/><stop offset="1" stop-color="#050e1a" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="grain" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4"/>
+              <feColorMatrix values="0 0 0 0 .75  0 0 0 0 .82  0 0 0 0 .9  0 0 0 .07 0"/>
+            </filter>
+            <radialGradient id="sheen" cx="50%" cy="50%" r="50%">
+              <stop offset="0" stop-color="#cfe0f5" stop-opacity=".10"/><stop offset="1" stop-color="#cfe0f5" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect width="1600" height="1000" fill="#060f1c"/>
+          <rect x="0" y="0" width="160" height="160" fill="#0a1626"/>
+          <rect x="160" y="0" width="160" height="160" fill="#09141f"/>
+          <rect x="320" y="0" width="160" height="160" fill="#0b1829"/>
+          <rect x="480" y="0" width="160" height="160" fill="#08131f"/>
+          <rect x="640" y="0" width="160" height="160" fill="#0a1626"/>
+          <rect x="800" y="0" width="160" height="160" fill="#09141f"/>
+          <rect x="960" y="0" width="160" height="160" fill="#0b1829"/>
+          <rect x="1120" y="0" width="160" height="160" fill="#08131f"/>
+          <rect x="1280" y="0" width="160" height="160" fill="#0a1626"/>
+          <rect x="1440" y="0" width="160" height="160" fill="#09141f"/>
+          <rect x="0" y="160" width="160" height="160" fill="#09141f"/>
+          <rect x="160" y="160" width="160" height="160" fill="#09141f"/>
+          <rect x="320" y="160" width="160" height="160" fill="#09141f"/>
+          <rect x="480" y="160" width="160" height="160" fill="#09141f"/>
+          <rect x="640" y="160" width="160" height="160" fill="#09141f"/>
+          <rect x="800" y="160" width="160" height="160" fill="#09141f"/>
+          <rect x="960" y="160" width="160" height="160" fill="#09141f"/>
+          <rect x="1120" y="160" width="160" height="160" fill="#09141f"/>
+          <rect x="1280" y="160" width="160" height="160" fill="#09141f"/>
+          <rect x="1440" y="160" width="160" height="160" fill="#09141f"/>
+          <rect x="0" y="320" width="160" height="160" fill="#0b1829"/>
+          <rect x="160" y="320" width="160" height="160" fill="#09141f"/>
+          <rect x="320" y="320" width="160" height="160" fill="#0a1626"/>
+          <rect x="480" y="320" width="160" height="160" fill="#08131f"/>
+          <rect x="640" y="320" width="160" height="160" fill="#0b1829"/>
+          <rect x="800" y="320" width="160" height="160" fill="#09141f"/>
+          <rect x="960" y="320" width="160" height="160" fill="#0a1626"/>
+          <rect x="1120" y="320" width="160" height="160" fill="#08131f"/>
+          <rect x="1280" y="320" width="160" height="160" fill="#0b1829"/>
+          <rect x="1440" y="320" width="160" height="160" fill="#09141f"/>
+          <rect x="0" y="480" width="160" height="160" fill="#08131f"/>
+          <rect x="160" y="480" width="160" height="160" fill="#09141f"/>
+          <rect x="320" y="480" width="160" height="160" fill="#08131f"/>
+          <rect x="480" y="480" width="160" height="160" fill="#09141f"/>
+          <rect x="640" y="480" width="160" height="160" fill="#08131f"/>
+          <rect x="800" y="480" width="160" height="160" fill="#09141f"/>
+          <rect x="960" y="480" width="160" height="160" fill="#08131f"/>
+          <rect x="1120" y="480" width="160" height="160" fill="#09141f"/>
+          <rect x="1280" y="480" width="160" height="160" fill="#08131f"/>
+          <rect x="1440" y="480" width="160" height="160" fill="#09141f"/>
+          <rect x="0" y="640" width="160" height="160" fill="#0a1626"/>
+          <rect x="160" y="640" width="160" height="160" fill="#09141f"/>
+          <rect x="320" y="640" width="160" height="160" fill="#0b1829"/>
+          <rect x="480" y="640" width="160" height="160" fill="#08131f"/>
+          <rect x="640" y="640" width="160" height="160" fill="#0a1626"/>
+          <rect x="800" y="640" width="160" height="160" fill="#09141f"/>
+          <rect x="960" y="640" width="160" height="160" fill="#0b1829"/>
+          <rect x="1120" y="640" width="160" height="160" fill="#08131f"/>
+          <rect x="1280" y="640" width="160" height="160" fill="#0a1626"/>
+          <rect x="1440" y="640" width="160" height="160" fill="#09141f"/>
+          <rect x="0" y="800" width="160" height="160" fill="#09141f"/>
+          <rect x="160" y="800" width="160" height="160" fill="#09141f"/>
+          <rect x="320" y="800" width="160" height="160" fill="#09141f"/>
+          <rect x="480" y="800" width="160" height="160" fill="#09141f"/>
+          <rect x="640" y="800" width="160" height="160" fill="#09141f"/>
+          <rect x="800" y="800" width="160" height="160" fill="#09141f"/>
+          <rect x="960" y="800" width="160" height="160" fill="#09141f"/>
+          <rect x="1120" y="800" width="160" height="160" fill="#09141f"/>
+          <rect x="1280" y="800" width="160" height="160" fill="#09141f"/>
+          <rect x="1440" y="800" width="160" height="160" fill="#09141f"/>
+          <rect x="0" y="960" width="160" height="160" fill="#0b1829"/>
+          <rect x="160" y="960" width="160" height="160" fill="#09141f"/>
+          <rect x="320" y="960" width="160" height="160" fill="#0a1626"/>
+          <rect x="480" y="960" width="160" height="160" fill="#08131f"/>
+          <rect x="640" y="960" width="160" height="160" fill="#0b1829"/>
+          <rect x="800" y="960" width="160" height="160" fill="#09141f"/>
+          <rect x="960" y="960" width="160" height="160" fill="#0a1626"/>
+          <rect x="1120" y="960" width="160" height="160" fill="#08131f"/>
+          <rect x="1280" y="960" width="160" height="160" fill="#0b1829"/>
+          <rect x="1440" y="960" width="160" height="160" fill="#09141f"/>
+          <ellipse cx="1060" cy="430" rx="560" ry="430" fill="url(#flood)"/>
+          <ellipse cx="1060" cy="380" rx="240" ry="160" fill="url(#sheen)"/>
+          <ellipse cx="180" cy="80" rx="380" ry="260" fill="url(#flood)" opacity=".6"/>
+          <rect width="1600" height="1000" filter="url(#grain)"/>
+          <rect width="1600" height="1000" fill="url(#slabs)"/>
+          <rect class="apron__box" x="800" y="70" width="560" height="740"/>
+          <path class="apron__lead" d="M1600 930 C1260 930 1080 860 1080 640 L1080 120"/>
+          <path class="apron__stop" d="M1010 120 H1150"/>
+          <text class="apron__stand" x="1112" y="770">STAND 4</text>
+        </svg>
+
+        <div class="hero__copy" data-hero-copy>
+          <h1 class="hero__title">The tech log,<br>without the paper.</h1>
+          <p class="hero__lede">The electronic Aircraft Technical Log: offline in the cockpit, signed, sealed and sent to CAMO.</p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="#contact" data-mail>Talk to us</a>
+            <a class="btn btn--ghost" href="#lifecycle">See how it works</a>
+          </div>
+        </div>
+
+        <!-- flight scenery: sky with cloud deck, runway 30 at LJLJ, fog -->
+        <div class="sky" data-sky aria-hidden="true">
+          <i class="cloud" style="left:6%;top:-150%;width:46vw"></i>
+          <i class="cloud" style="left:58%;top:-122%;width:38vw"></i>
+          <i class="cloud" style="left:22%;top:-96%;width:52vw"></i>
+          <i class="cloud" style="left:70%;top:-70%;width:34vw"></i>
+          <i class="cloud" style="left:-8%;top:-44%;width:40vw"></i>
+          <i class="cloud" style="left:40%;top:-18%;width:44vw"></i>
+          <i class="cloud" style="left:76%;top:8%;width:36vw"></i>
+          <i class="cloud" style="left:4%;top:36%;width:42vw"></i>
+        </div>
+        <div class="runway" data-runway aria-hidden="true">
+          <svg viewBox="0 0 240 2400" preserveAspectRatio="xMidYMin meet">
+            <defs>
+              <radialGradient id="als" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fffbe8"/><stop offset=".35" stop-color="#ffe9a8" stop-opacity=".9"/><stop offset="1" stop-color="#ffd76a" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect x="60" y="0" width="120" height="1700" fill="#1a222d"/>
+            <rect x="60" y="0" width="120" height="1700" fill="url(#slabs)" opacity=".5"/>
+            <path d="M64 0 V1700 M176 0 V1700" stroke="#e9eef3" stroke-width="2.5" opacity=".85"/>
+            <path d="M120 40 V1440" stroke="#e9eef3" stroke-width="3" stroke-dasharray="36 28" opacity=".8"/>
+            <g fill="#e9eef3" opacity=".85">
+              <rect x="80" y="1220" width="8" height="46"/><rect x="92" y="1220" width="8" height="46"/><rect x="140" y="1220" width="8" height="46"/><rect x="152" y="1220" width="8" height="46"/>
+              <rect x="80" y="1330" width="8" height="46"/><rect x="92" y="1330" width="8" height="46"/><rect x="140" y="1330" width="8" height="46"/><rect x="152" y="1330" width="8" height="46"/>
+              <rect x="76" y="1100" width="22" height="70"/><rect x="142" y="1100" width="22" height="70"/>
+            </g>
+            <text class="runway__no" x="120" y="1590" text-anchor="middle" data-pt="a-rwy">30</text>
+            <g fill="#e9eef3" opacity=".9">
+              <rect x="70" y="1620" width="6" height="64"/><rect x="82" y="1620" width="6" height="64"/><rect x="94" y="1620" width="6" height="64"/><rect x="106" y="1620" width="6" height="64"/>
+              <rect x="128" y="1620" width="6" height="64"/><rect x="140" y="1620" width="6" height="64"/><rect x="152" y="1620" width="6" height="64"/><rect x="164" y="1620" width="6" height="64"/>
+            </g>
+            <!-- threshold lights and approach lighting system -->
+            <g class="runway__lights">
+              <circle cx="66" cy="1704" r="7" fill="#7cf09e"/><circle cx="86" cy="1704" r="7" fill="#7cf09e"/><circle cx="106" cy="1704" r="7" fill="#7cf09e"/><circle cx="134" cy="1704" r="7" fill="#7cf09e"/><circle cx="154" cy="1704" r="7" fill="#7cf09e"/><circle cx="174" cy="1704" r="7" fill="#7cf09e"/>
+              <g fill="url(#als)">
+                <circle cx="120" cy="1780" r="12"/><circle cx="120" cy="1850" r="12"/><circle cx="120" cy="1920" r="12"/><circle cx="120" cy="1990" r="12"/><circle cx="120" cy="2060" r="12"/><circle cx="120" cy="2130" r="12"/><circle cx="120" cy="2200" r="12"/><circle cx="120" cy="2270" r="12"/><circle cx="120" cy="2340" r="12"/>
+                <circle cx="104" cy="1780" r="9"/><circle cx="136" cy="1780" r="9"/><circle cx="104" cy="1850" r="9"/><circle cx="136" cy="1850" r="9"/>
+                <circle cx="40" cy="2060" r="10"/><circle cx="60" cy="2060" r="10"/><circle cx="80" cy="2060" r="10"/><circle cx="160" cy="2060" r="10"/><circle cx="180" cy="2060" r="10"/><circle cx="200" cy="2060" r="10"/>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div class="fog" data-fog aria-hidden="true"></div>
+
+        <div class="hero__jet" data-jet>
+          <svg viewBox="0 0 600 640" role="img" aria-label="Cessna Citation 560XL parked on stand, seen from above">
+            <use href="#jet"/>
+            <g class="hot">
+              <circle data-pt="fuel" cx="102" cy="297" r="9"/>
+              <circle data-pt="reg" cx="300" cy="230" r="9"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- preflight close-up: main wheel with an inflation gauge on the valve -->
+        <div class="closeup" data-tyre aria-hidden="true">
+          <svg viewBox="0 0 640 420">
+            <defs>
+              <radialGradient id="tyRubber" cx="42%" cy="38%" r="62%"><stop offset="0" stop-color="#3a3f47"/><stop offset=".7" stop-color="#1c1f24"/><stop offset="1" stop-color="#0d0f12"/></radialGradient>
+              <linearGradient id="tyRim" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#f2f5f8"/><stop offset=".45" stop-color="#aeb9c6"/><stop offset="1" stop-color="#5f6c7c"/></linearGradient>
+              <linearGradient id="tyDish" x1="1" x2="0" y1="1" y2="0"><stop offset="0" stop-color="#e6ebf0"/><stop offset="1" stop-color="#6f7c8c"/></linearGradient>
+            </defs>
+            <circle cx="210" cy="220" r="172" fill="url(#tyRubber)"/>
+            <circle cx="210" cy="220" r="156" fill="none" stroke="#fff" stroke-opacity=".05" stroke-width="2"/>
+            <circle cx="210" cy="220" r="130" fill="none" stroke="#fff" stroke-opacity=".06" stroke-width="10"/>
+            <path d="M88 132 A150 150 0 0 1 196 70" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="210" cy="220" r="102" fill="url(#tyRim)" stroke="#4f5b69" stroke-width="2"/>
+            <circle cx="210" cy="220" r="78" fill="url(#tyDish)"/>
+            <circle cx="210" cy="220" r="32" fill="url(#tyRim)" stroke="#4f5b69" stroke-width="2"/>
+            <g fill="#4f5b69"><circle cx="260" cy="220" r="5"/><circle cx="245.4" cy="255.4" r="5"/><circle cx="210" cy="270" r="5"/><circle cx="174.6" cy="255.4" r="5"/><circle cx="160" cy="220" r="5"/><circle cx="174.6" cy="184.6" r="5"/><circle cx="210" cy="170" r="5"/><circle cx="245.4" cy="184.6" r="5"/></g>
+            <circle cx="210" cy="220" r="10" fill="#3d4856"/>
+            <!-- valve, hose, gauge -->
+            <path d="M272 168 l14 -12" stroke="#c9a24b" stroke-width="7" stroke-linecap="round"/>
+            <path class="ty-hose" d="M288 154 C330 112 352 108 388 126"/>
+            <circle cx="470" cy="180" r="104" fill="url(#tyRim)" stroke="#4f5b69" stroke-width="2"/>
+            <circle cx="470" cy="180" r="90" fill="#f5f7f9"/>
+            <g data-gauge-ticks></g>
+            <text class="ty-unit" x="470" y="236" text-anchor="middle">PSI</text>
+            <g data-needle><path d="M466 184 L470 104 L474 184 Z" fill="#c8331f"/><circle cx="470" cy="180" r="9" fill="#2a333f"/></g>
+            <text class="ty-pos" x="470" y="48" text-anchor="middle" data-tyre-pos>TYRE · NLG</text>
+            <circle class="ex-pt" data-pt="tyre" cx="560" cy="112" r="7"/>
+          </svg>
+        </div>
+
+        <!-- preflight close-up: engine oil tank sight gauge, uplift poured in -->
+        <div class="closeup" data-oil aria-hidden="true">
+          <svg viewBox="0 0 640 420">
+            <defs>
+              <linearGradient id="oilTank" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#7d8a9a"/><stop offset=".3" stop-color="#e9eef3"/><stop offset=".6" stop-color="#c3ccd6"/><stop offset="1" stop-color="#6b7887"/></linearGradient>
+              <linearGradient id="oilFluid" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#8f6a1d"/><stop offset=".45" stop-color="#e2b752"/><stop offset="1" stop-color="#8a6419"/></linearGradient>
+              <clipPath id="oilGlass"><rect x="214" y="118" width="44" height="204" rx="12"/></clipPath>
+            </defs>
+            <rect x="150" y="62" width="250" height="300" rx="44" fill="url(#oilTank)" stroke="#4f5b69" stroke-width="2"/>
+            <path d="M176 100 H374 M176 330 H374" stroke="#4f5b69" stroke-opacity=".35"/>
+            <rect x="300" y="40" width="56" height="28" rx="6" fill="url(#oilTank)" stroke="#4f5b69" stroke-width="2"/>
+            <rect x="292" y="30" width="72" height="14" rx="5" fill="#3d4856"/>
+            <rect x="210" y="114" width="52" height="212" rx="15" fill="#3d4856"/>
+            <rect x="214" y="118" width="44" height="204" rx="12" fill="#0f1a26"/>
+            <rect data-oil-level clip-path="url(#oilGlass)" x="214" y="150" width="44" height="172" fill="url(#oilFluid)"/>
+            <rect x="220" y="124" width="8" height="190" rx="4" fill="#fff" opacity=".18"/>
+            <path d="M262 150 H282 M262 250 H282 M262 200 H274" stroke="#1d2733" stroke-width="3"/>
+            <text class="oil-mark" x="290" y="155">FULL</text>
+            <text class="oil-mark" x="290" y="255">ADD</text>
+            <text class="ty-pos" x="275" y="400" text-anchor="middle" data-oil-pos>ENG 1 · OIL</text>
+            <circle class="ex-pt" data-pt="oil" cx="236" cy="150" r="7"/>
+            <!-- quart can: spout at the inner origin -->
+            <path data-oil-stream d="M329 4 C328 18 328 30 328 44" stroke="#d9ad4b" stroke-width="6" stroke-linecap="round" fill="none" opacity="0"/>
+            <g data-can transform="translate(520 120)">
+              <g data-can-tilt>
+                <path d="M0 0 L-16 -6 L-14 6 L4 14 Z" fill="#9aa7b6"/>
+                <rect x="-6" y="8" width="74" height="112" rx="9" fill="#e9eef3" stroke="#4f5b69" stroke-width="2"/>
+                <rect x="-6" y="44" width="74" height="40" fill="#2d6ba8"/>
+                <text x="31" y="70" text-anchor="middle" class="oil-can">1 QT</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+
+        <!-- engine 2 (PW545), cut away and taken apart module by module -->
+        <div class="engine-x" data-engine aria-hidden="true">
+          <svg viewBox="0 0 1000 380">
+            <defs>
+              <linearGradient id="exCowl" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f6f8fa"/><stop offset=".55" stop-color="#d9e0e7"/><stop offset="1" stop-color="#9aa7b6"/></linearGradient>
+              <linearGradient id="exSteel" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#dde3ea"/><stop offset=".5" stop-color="#9ba8b7"/><stop offset="1" stop-color="#5d6a7a"/></linearGradient>
+              <linearGradient id="exBlade" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#8794a4"/><stop offset=".45" stop-color="#e8edf2"/><stop offset="1" stop-color="#6f7c8c"/></linearGradient>
+              <linearGradient id="exHot" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#7d7268"/><stop offset=".45" stop-color="#cdbba3"/><stop offset="1" stop-color="#6a5c50"/></linearGradient>
+              <linearGradient id="exSpinner" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#2a3442"/><stop offset=".6" stop-color="#55606e"/><stop offset="1" stop-color="#202934"/></linearGradient>
+              <radialGradient id="exFlame" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#9cc8ff" stop-opacity=".9"/><stop offset="1" stop-color="#2d6ba8" stop-opacity="0"/></radialGradient>
+              <g id="exCowlHalf">
+                <path d="M178 66 C176 52 186 42 204 40 C260 34 320 33 420 34 L690 44 C740 50 774 70 804 98 C770 80 736 68 690 64 L420 56 C330 55 262 56 222 62 C204 64 192 70 186 80 C182 76 179 72 178 66 Z"/>
+                <path d="M204 41 C260 35 320 34 420 35" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2"/>
+              </g>
+              <g id="exFanHalf">
+                <path class="ex-blade" d="M210 68 C222 64 238 64 248 68 L252 152 L214 152 C214 120 212 92 210 68 Z"/>
+                <path d="M222 74 L226 150 M232 74 L236 150 M241 76 L244 150" stroke="#5d6a7a" stroke-width="1" opacity=".55"/>
+              </g>
+              <g id="exCompHalf">
+                <path class="ex-case" d="M262 98 L420 116 L420 124 L262 108 Z"/>
+                <rect class="ex-blade" x="270" y="108" width="12" height="44"/>
+                <rect class="ex-stator" x="290" y="111" width="8" height="41"/>
+                <rect class="ex-blade" x="304" y="113" width="12" height="39"/>
+                <rect class="ex-stator" x="324" y="116" width="8" height="36"/>
+                <rect class="ex-blade" x="338" y="118" width="12" height="34"/>
+                <path class="ex-blade" d="M362 140 Q392 138 410 112 L424 112 L424 152 L362 152 Z"/>
+              </g>
+              <g id="exCombHalf">
+                <path class="ex-case" d="M440 104 C470 92 540 92 572 104 L572 112 C540 101 470 101 440 112 Z"/>
+                <path class="ex-liner" d="M446 122 C476 108 536 108 566 122 L566 146 C536 136 476 136 446 146 Z"/>
+                <ellipse fill="url(#exFlame)" cx="508" cy="128" rx="58" ry="14"/>
+                <g fill="#3a4757"><circle cx="470" cy="139" r="2.4"/><circle cx="492" cy="136" r="2.4"/><circle cx="514" cy="136" r="2.4"/><circle cx="536" cy="138" r="2.4"/></g>
+                <path d="M440 132 L452 132" stroke="#3a4757" stroke-width="5" stroke-linecap="round"/>
+              </g>
+              <g id="exTurbHalf">
+                <path class="ex-case" d="M582 106 L676 98 L676 106 L582 114 Z"/>
+                <rect class="ex-hot" x="588" y="116" width="14" height="36"/>
+                <rect class="ex-stator" x="608" y="112" width="8" height="40" opacity=".8"/>
+                <rect class="ex-hot" x="622" y="110" width="14" height="42"/>
+                <rect class="ex-stator" x="642" y="106" width="8" height="46" opacity=".8"/>
+                <rect class="ex-hot" x="656" y="104" width="14" height="48"/>
+              </g>
+              <g id="exExhHalf">
+                <path class="ex-case" d="M688 96 L796 104 L796 110 L688 104 Z"/>
+                <path class="ex-plug" d="M684 152 L684 132 C720 132 770 150 800 186 L800 190 L684 190 Z"/>
+              </g>
+            </defs>
+
+            <line class="ex-shaft" x1="214" y1="190" x2="690" y2="190"/>
+
+            <g data-ex="cowl-top" class="ex-part"><use href="#exCowlHalf" class="ex-cowl"/></g>
+            <g data-ex="cowl-bot" class="ex-part"><use href="#exCowlHalf" class="ex-cowl" transform="matrix(1 0 0 -1 0 380)"/></g>
+
+            <g data-ex="fan" class="ex-part">
+              <use href="#exFanHalf"/><use href="#exFanHalf" transform="matrix(1 0 0 -1 0 380)"/>
+              <rect x="214" y="152" width="36" height="76" fill="url(#exSteel)"/>
+              <path d="M170 190 C174 172 192 156 214 152 L214 228 C192 224 174 208 170 190 Z" fill="url(#exSpinner)"/>
+              <path d="M180 184 C186 172 196 164 208 160" stroke="#fff" stroke-opacity=".35" stroke-width="2" fill="none"/>
+              <circle class="ex-pt" data-pt="x-n1" cx="232" cy="96" r="7"/>
+              <text class="ex-label" x="232" y="26" text-anchor="middle">FAN · N1</text>
+            </g>
+            <g data-ex="comp" class="ex-part">
+              <use href="#exCompHalf"/><use href="#exCompHalf" transform="matrix(1 0 0 -1 0 380)"/>
+              <rect x="262" y="152" width="162" height="76" fill="url(#exSteel)" opacity=".9"/>
+              <circle class="ex-pt" data-pt="x-n2" cx="344" cy="126" r="7"/>
+              <text class="ex-label" x="344" y="86" text-anchor="middle">COMPRESSOR · N2</text>
+            </g>
+            <g data-ex="comb" class="ex-part">
+              <use href="#exCombHalf"/><use href="#exCombHalf" transform="matrix(1 0 0 -1 0 380)"/>
+              <rect x="440" y="160" width="132" height="60" fill="url(#exSteel)" opacity=".75"/>
+              <circle class="ex-pt" data-pt="x-ff" cx="508" cy="128" r="7"/>
+              <text class="ex-label" x="506" y="80" text-anchor="middle">COMBUSTOR · FUEL FLOW</text>
+            </g>
+            <g data-ex="turb" class="ex-part">
+              <use href="#exTurbHalf"/><use href="#exTurbHalf" transform="matrix(1 0 0 -1 0 380)"/>
+              <rect x="582" y="152" width="94" height="76" fill="url(#exSteel)" opacity=".8"/>
+              <circle class="ex-pt" data-pt="x-itt" cx="615" cy="130" r="7"/>
+              <text class="ex-label" x="630" y="84" text-anchor="middle">TURBINE · ITT</text>
+            </g>
+            <g data-ex="exh" class="ex-part">
+              <use href="#exExhHalf"/><use href="#exExhHalf" transform="matrix(1 0 0 -1 0 380)"/>
+              <text class="ex-label ex-label--quiet" x="744" y="80" text-anchor="middle">EXHAUST</text>
+            </g>
+            <g data-ex="agb" class="ex-part">
+              <rect class="ex-box" x="300" y="300" width="140" height="44" rx="10"/>
+              <circle class="ex-gear" cx="330" cy="322" r="15"/><circle class="ex-gear" cx="366" cy="322" r="11"/><circle class="ex-gear" cx="400" cy="322" r="15"/>
+              <rect class="ex-box" x="452" y="298" width="56" height="48" rx="22"/>
+              <rect x="472" y="310" width="16" height="24" rx="4" fill="#24405f" stroke="#cfd7e0"/>
+              <rect x="472" y="322" width="16" height="12" rx="3" fill="#c9a24b" opacity=".85"/>
+              <circle class="ex-pt" data-pt="x-ot" cx="366" cy="322" r="7"/>
+              <circle class="ex-pt" data-pt="x-op" cx="480" cy="306" r="7"/>
+              <text class="ex-label" x="400" y="374" text-anchor="middle">GEARBOX · OIL</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- flight deck readouts -->
+        <div class="hud" data-hud aria-hidden="true">
+          <div class="hud__set" data-hud-cruise>
+            <span><small>FL</small><b class="mono" data-pt="h-fl" data-count="370">000</b></span>
+            <span><small>TAT °C</small><b class="mono" data-pt="h-tat" data-count="-34">+15</b></span>
+            <span><small>OAT °C</small><b class="mono" data-pt="h-oat" data-count="-55">+15</b></span>
+            <span><small>Mach</small><b class="mono" data-pt="h-mach" data-count="0.70">0.00</b></span>
+          </div>
+          <div class="hud__set hud__set--ra" data-hud-ra>
+            <span><small>Radio altitude</small><b class="mono" data-pt="a-ra" data-ra>1000 ft</b></span>
+            <span><small>RVR</small><b class="mono">250 m</b></span>
+            <em class="hud__dh mono" data-dh>Minimums</em>
+          </div>
+        </div>
+
+        <article class="sheet" data-sheet aria-label="Example ATL record, demo data">
+          <header class="sheet__head">
+            <div>
+              <span class="sheet__label">Aircraft Technical Log</span>
+              <strong class="sheet__no mono" data-type>YU-RDA-000001</strong>
+            </div>
+            <span class="pill pill--draft" data-status>Draft</span>
+          </header>
+          <nav class="sheet__tabs" aria-hidden="true"><span class="is-on" data-tab>Preflight</span><span data-tab>Flight</span><span data-tab>Engine</span><span data-tab>All Weather</span></nav>
+          <div class="sheet__pages">
+            <div class="sheet__page is-on" data-page>
+              <div class="sheet__grid">
+                <div class="cell" data-field="reg"><span>Aircraft</span><b class="mono" data-type>YU-RDA · C560XL</b></div>
+                <div class="cell"><span>Date (UTC)</span><b class="mono" data-type>24 OCT 2026</b></div>
+                <div class="cell"><span>From</span><b class="mono"><i data-type>LYBE</i><em class="tag">Carried</em></b></div>
+                <div class="cell"><span>To</span><b class="mono" data-type>LJLJ</b></div>
+                <div class="cell"><span>Next maintenance</span><b class="mono" data-type>214:30 FH left</b></div>
+                <div class="cell"><span>Open defects</span><b class="mono" data-type>None</b></div>
+                <div class="cell cell--wide" data-field="fuel"><span>Fuel uplift → onboard</span><b class="mono"><i data-type>1 200 L = 2 116 lb → 6 210 lb</i><em class="tag">Auto</em></b></div>
+                <div class="cell" data-field="eng1"><span>Oil uplift · Eng 1</span><b class="mono" data-type>OK</b></div>
+                <div class="cell" data-field="eng2"><span>Oil uplift · Eng 2</span><b class="mono" data-type>0.5 qt</b></div>
+                <div class="cell" data-field="nlg"><span>Tyre · NLG</span><b class="mono" data-type>120 psi</b></div>
+                <div class="cell" data-field="lmlg"><span>Tyre · LH MLG</span><b class="mono" data-type>165 psi</b></div>
+                <div class="cell" data-field="rmlg"><span>Tyre · RH MLG</span><b class="mono" data-type>165 psi</b></div>
+                <div class="cell"><span>Fuel type</span><b class="mono"><i data-type>JET-A1</i><em class="tag">Auto</em></b></div>
+              </div>
+            </div>
+            <div class="sheet__page" data-page>
+              <div class="sheet__grid">
+                <div class="cell"><span>Commander</span><b data-type>M. Petrović</b></div>
+                <div class="cell"><span>SIC</span><b data-type>A. Kovač</b></div>
+                <div class="cell"><span>STW</span><b data-type>J. Ilić</b></div>
+                <div class="cell"><span>From</span><b class="mono"><i data-type>LYBE</i><em class="tag">Carried</em></b></div>
+                <div class="cell"><span>To</span><b class="mono" data-type>LJLJ</b></div>
+                <div class="cell"><span>Nature of flight</span><b data-type>Commercial</b></div>
+                <div class="cell"><span>Pax M · F · C · I</span><b class="mono" data-type>3 · 2 · 0 · 0</b></div>
+                <div class="cell" data-stamp="off"><span>Block OFF</span><b class="mono" data-type>06:42</b></div>
+                <div class="cell" data-stamp="to"><span>Take-Off</span><b class="mono" data-type>06:55</b></div>
+                <div class="cell" data-stamp="ldg"><span>Landing</span><b class="mono" data-type>07:41</b></div>
+                <div class="cell" data-stamp="on"><span>Block ON</span><b class="mono" data-type>07:50</b></div>
+                <div class="cell" data-stamp="fuel"><span>Fuel at cut-off</span><b class="mono" data-type>4 020 lb</b></div>
+                <div class="cell" data-stamp="bt"><span>Block time</span><b class="mono"><i data-type>01:08</i><em class="tag tag--calc">Calc</em></b></div>
+                <div class="cell" data-stamp="ft"><span>Flight time</span><b class="mono"><i data-type>00:46</i><em class="tag tag--calc">Calc</em></b></div>
+                <div class="cell" data-stamp="ld"><span>Landings</span><b class="mono" data-type>1</b></div>
+              </div>
+            </div>
+            <div class="sheet__page" data-page>
+              <div class="sheet__grid sheet__grid--amb">
+                <div class="cell" data-field="h-fl"><span>Flight level</span><b class="mono" data-type>370</b></div>
+                <div class="cell" data-field="h-tat"><span>TAT °C</span><b class="mono" data-type>−34</b></div>
+                <div class="cell" data-field="h-oat"><span>OAT °C</span><b class="mono" data-type>−55</b></div>
+                <div class="cell" data-field="h-mach"><span>Mach</span><b class="mono" data-type>0.70</b></div>
+              </div>
+              <div class="sheet__grid sheet__grid--eng">
+                <div class="cell cell--th"><span>Parameter</span></div>
+                <div class="cell cell--th"><span>ENG 1 · LH</span></div>
+                <div class="cell cell--th"><span>ENG 2 · RH</span></div>
+                <div class="cell cell--k"><b>N1 %</b></div><div class="cell" data-e1><b class="mono" data-type>88.4</b></div><div class="cell" data-field="x-n1"><b class="mono" data-type>88.6</b></div>
+                <div class="cell cell--k"><b>N2 %</b></div><div class="cell" data-e1><b class="mono" data-type>94.1</b></div><div class="cell" data-field="x-n2"><b class="mono" data-type>94.3</b></div>
+                <div class="cell cell--k"><b>Fuel flow pph</b></div><div class="cell" data-e1><b class="mono" data-type>640</b></div><div class="cell" data-field="x-ff"><b class="mono" data-type>652</b></div>
+                <div class="cell cell--k"><b>ITT °C</b></div><div class="cell" data-e1><b class="mono" data-type>682</b></div><div class="cell" data-field="x-itt"><b class="mono" data-type>688</b></div>
+                <div class="cell cell--k"><b>Oil temp °C</b></div><div class="cell" data-e1><b class="mono" data-type>78</b></div><div class="cell" data-field="x-ot"><b class="mono" data-type>80</b></div>
+                <div class="cell cell--k"><b>Oil press psi</b></div><div class="cell" data-e1><b class="mono" data-type>74</b></div><div class="cell" data-field="x-op"><b class="mono" data-type>75</b></div>
+              </div>
+            </div>
+            <div class="sheet__page" data-page>
+              <div class="sheet__grid">
+                <div class="cell"><span>Visibility (RVR)</span><b class="mono" data-type>250 m</b></div>
+                <div class="cell"><span>Ceiling</span><b class="mono" data-type>100 ft</b></div>
+                <div class="cell" data-field="a-rwy"><span>Runway</span><b class="mono" data-type>30</b></div>
+                <div class="cell"><span>Wind direction</span><b class="mono" data-type>290°</b></div>
+                <div class="cell"><span>Wind speed</span><b class="mono" data-type>06 kt</b></div>
+                <div class="cell" data-field="a-ra"><span>Radio altimeter</span><b class="mono" data-type>50 ft</b></div>
+                <div class="cell"><span>Result</span><b data-type>Satisfactory</b></div>
+                <div class="cell" style="grid-column: span 2"><span>Remarks</span><b data-type>CAT IIIA approach, autoland</b></div>
+              </div>
+            </div>
+          </div>
+          <footer class="sheet__sign">
+            <div class="sheet__sig">
+              <span>Commander · Preflight</span>
+              <svg viewBox="0 0 220 60" aria-hidden="true"><path data-sig d="M6 42 C22 8 34 8 30 36 C28 52 44 20 56 22 C66 24 58 46 70 40 C84 32 90 12 98 18 C106 26 96 48 112 38 C128 28 134 30 140 36 C150 46 162 20 176 24 C188 28 196 34 214 28"/></svg>
+            </div>
+            <div class="sheet__hash mono">
+              <span>PIN verified 06:31Z</span>
+              <span data-type>sha256 9f2c4e…7a01</span>
+            </div>
+            <span class="sheet__dot" aria-hidden="true"></span>
+          </footer>
+          <p class="sheet__demo">Demo data</p>
+        </article>
+
+        <svg class="ticks" data-ticks aria-hidden="true"></svg>
+
+        <ol class="chapters" data-chapters aria-hidden="true">
+          <li class="is-on"><b>Preflight</b><span>On stand. Walkaround to log.</span></li>
+          <li><b>Flight</b><span>Block OFF, Take-Off, stamped in UTC.</span></li>
+          <li><b>Engine</b><span>Cruise readings, engine by engine.</span></li>
+          <li><b>All Weather</b><span>Low-visibility approach, recorded.</span></li>
+        </ol>
+
+        <p class="hero__cue" data-cue>Scroll — watch the aircraft fill its own log</p>
+      </div>
+    </section>
+
+    <!-- ============ STATEMENT ============ -->
+    <section class="statement" aria-label="What eATL is">
+      <p class="statement__text" data-words>One flight. One record. Preflight, Flight, Flight Data and Defects, signed by the people responsible for each part, then closed by Technical Staff and archived as a PDF for CAMO. Nothing retyped, nothing lost in the seat pocket.</p>
+    </section>
+
+    <!-- ============ LIFECYCLE ============ -->
+    <section class="life" id="lifecycle" data-life>
+      <div class="life__pin">
+        <div class="life__intro">
+          <h2 class="h2">From chocks-out to closed, in one record.</h2>
+          <ol class="life__steps" data-steps>
+            <li class="is-on"><b>Preflight</b><span>Fuel, oil, tyres, next maintenance and open defects, before every flight.</span></li>
+            <li><b>Flight</b><span>Crew, route, nature of flight, passengers. Commander and SIC on every leg.</span></li>
+            <li><b>Flight Data</b><span>Block OFF, Take-Off, Landing, Block ON in strict order, stored in UTC.</span></li>
+            <li><b>Defects</b><span>Reported with photos, deferred against the MEL/CDL, rectified with a CRS.</span></li>
+            <li><b>Close</b><span>Commander and Technical Staff sign. The record locks and goes to CAMO.</span></li>
+          </ol>
+        </div>
+
+        <div class="ipad" aria-hidden="true">
+          <span class="demo-note">Demo data</span>
+          <div class="ipad__screen">
+            <div class="app">
+              <div class="app__bar">
+                <span class="mono">YU-RDA-000001</span>
+                <span class="app__route mono">LYBE → LJLJ</span>
+                <span class="pill" data-app-status>Draft</span>
+              </div>
+              <div class="app__tabs" data-app-tabs>
+                <span class="is-on">Preflight</span><span>Flight</span><span>Flight Data</span><span>Defects</span><span>Close</span>
+              </div>
+              <div class="app__panes">
+                <div class="pane is-on" data-pane>
+                  <div class="row"><span>Date (UTC)</span><b class="mono">24 OCT 2026</b></div>
+                  <div class="row"><span>Fuel onboard</span><b class="mono">6 210 lb</b><em class="tag">Auto</em></div>
+                  <div class="row"><span>Fuel type</span><b class="mono">JET-A1</b><em class="tag">Auto</em></div>
+                  <div class="row"><span>Oil uplift</span><b class="mono">OK · 0.5 qt</b></div>
+                  <div class="row"><span>Tyres (first flight UTC day)</span><b class="mono">120 · 165 · 165 psi</b></div>
+                  <div class="row"><span>Next maintenance</span><b class="mono">214:30 FH left</b></div>
+                  <div class="row"><span>Open defects</span><b class="mono ok">None</b></div>
+                  <div class="sign ok">Preflight signed · Commander · 06:31Z</div>
+                </div>
+                <div class="pane" data-pane>
+                  <div class="row"><span>Commander</span><b>M. Petrović</b></div>
+                  <div class="row"><span>SIC</span><b>A. Kovač</b></div>
+                  <div class="row"><span>Nature of flight</span><b>Commercial</b></div>
+                  <div class="row"><span>Passengers M · F · C · I</span><b class="mono">3 · 2 · 0 · 0</b></div>
+                  <div class="row"><span>STW</span><b>J. Ilić</b></div>
+                  <div class="row"><span>From</span><b class="mono">LYBE</b><em class="tag">Carried</em></div>
+                  <div class="row"><span>To</span><b class="mono">LJLJ</b></div>
+                  <div class="row"><span>Flight time since previous ATL</span><b class="mono">1 412:05</b><em class="tag">Prev</em></div>
+                </div>
+                <div class="pane" data-pane>
+                  <div class="timeline">
+                    <div class="timeline__bar"><i data-tl-fill></i></div>
+                    <div class="timeline__marks">
+                      <span><b class="mono">06:42</b>Block OFF</span>
+                      <span><b class="mono">06:55</b>Take-Off</span>
+                      <span><b class="mono">07:41</b>Landing</span>
+                      <span><b class="mono">07:50</b>Block ON</span>
+                    </div>
+                  </div>
+                  <div class="row"><span>Block time</span><b class="mono">01:08</b><em class="tag tag--calc">Calc</em></div>
+                  <div class="row"><span>Flight time</span><b class="mono">00:46</b><em class="tag tag--calc">Calc</em></div>
+                  <div class="row"><span>Landings</span><b class="mono">1</b></div>
+                  <div class="row"><span>Fuel at cut-off</span><b class="mono">4 020 lb</b></div>
+                  <div class="row"><span>Fuel used</span><b class="mono">2 190 lb · 1 242 L</b><em class="tag tag--calc">Calc</em></div>
+                </div>
+                <div class="pane" data-pane>
+                  <div class="defect">
+                    <div class="defect__top"><b class="mono">ATA 32-41</b><span class="pill pill--warn">Deferred · MEL C</span></div>
+                    <p>LH MLG brake wear indicator at limit.</p>
+                    <div class="row"><span>Deadline</span><b class="mono">03 NOV 2026 23:59:59Z</b><em class="tag tag--calc">Calc</em></div>
+                    <div class="row"><span>Notified</span><b>LINE · CAMO · OPS</b></div>
+                  </div>
+                  <div class="sign ok">Added to the Deferred Defect List. Visible on every Preflight until closed.</div>
+                </div>
+                <div class="pane" data-pane>
+                  <div class="row"><span>Commander · Flight</span><b class="ok">Signed 07:58Z</b></div>
+                  <div class="row"><span>Technical Staff · Close</span><b class="ok">Signed 08:20Z</b></div>
+                  <div class="row"><span>PDF to CAMO</span><b class="mono">Sent · YU-RDA-000001.pdf</b></div>
+                  <div class="row"><span>Hash chain</span><b class="mono ok">4 of 4 intact</b></div>
+                  <div class="row"><span>Next flight</span><b>Not blocked</b></div>
+                  <div class="sign ok">Closed. Corrections only by Amendment.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ QR ============ -->
+    <section class="qr" id="trust">
+      <div class="wrap qr__grid">
+        <div class="qr__copy">
+          <h2 class="h2">Right aircraft. Proven, not assumed.</h2>
+          <p class="lede">Before a new record opens, the commander scans the QR sticker in the cockpit. The code is signed with the operator's ES256 key and verified on the device, offline. Similar registrations stop being a trap.</p>
+          <div class="qr__controls" role="group" aria-label="Try a scan">
+            <button class="chip is-on" data-scan="ok">Scan YU-RDA</button>
+            <button class="chip" data-scan="wrong">Scan YU-RDB</button>
+            <button class="chip" data-scan="override">Sticker damaged</button>
+          </div>
+          <div class="qr__result" data-scan-result aria-live="polite"></div>
+        </div>
+        <div class="qr__visual" aria-hidden="true">
+          <div class="placard">
+            <span class="placard__reg mono" data-placard-reg>YU-RDA</span>
+            <div class="qrcode" data-qrcode></div>
+            <span class="placard__foot">eATL aircraft confirmation · demo, not a working code</span>
+            <i class="scanline" data-scanline></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HASH CHAIN ============ -->
+    <section class="chain" data-chain>
+      <div class="wrap">
+        <h2 class="h2">Signed means sealed.</h2>
+        <p class="lede">Each signature stores a snapshot of the signer's own drawn signature, the time, and a hash of the record content, linked to the previous one. Change a signed value and the chain shows it.</p>
+      </div>
+      <div class="chain__track" data-chain-track>
+        <div class="block" data-block>
+          <span class="block__role">Maintenance · Preflight release</span>
+          <b class="block__time mono">06:18Z</b>
+          <span class="block__hash mono">prev 0000…0000</span>
+          <span class="block__hash mono" data-h>hash 41ad…c3e2</span>
+        </div>
+        <div class="link"></div>
+        <div class="block" data-block>
+          <span class="block__role">Commander · Preflight</span>
+          <b class="block__time mono">06:31Z</b>
+          <span class="block__hash mono">prev 41ad…c3e2</span>
+          <span class="block__hash mono" data-h>hash 9f2c…7a01</span>
+        </div>
+        <div class="link"></div>
+        <div class="block" data-block>
+          <span class="block__role">Commander · Flight</span>
+          <b class="block__time mono">07:58Z</b>
+          <span class="block__hash mono">prev 9f2c…7a01</span>
+          <span class="block__hash mono" data-h>hash e07b…19d4</span>
+        </div>
+        <div class="link"></div>
+        <div class="block" data-block>
+          <span class="block__role">Technical Staff · Close</span>
+          <b class="block__time mono">08:20Z</b>
+          <span class="block__hash mono">prev e07b…19d4</span>
+          <span class="block__hash mono" data-h>hash 5b90…aa7f</span>
+        </div>
+      </div>
+      <div class="wrap chain__actions">
+        <span class="demo-note demo-note--inline">Demo data</span>
+        <button class="btn btn--ghost" data-tamper>Edit a signed value</button>
+        <button class="btn btn--ghost" data-amend hidden>Correct it by Amendment</button>
+        <p class="chain__note" data-chain-note aria-live="polite">Fuel at cut-off: <b class="mono">4 020 lb</b></p>
+      </div>
+    </section>
+
+    <!-- ============ OFFLINE ============ -->
+    <section class="offline" data-offline>
+      <div class="wrap offline__grid">
+        <div>
+          <h2 class="h2">No signal at FL410. No problem.</h2>
+          <p class="lede">Every entry is written to the device's own database first, on iPad and in the browser alike. The outbox syncs when a network appears. A signed record is never rejected at sync, even if it arrives late.</p>
+          <label class="switch">
+            <input type="checkbox" data-net checked>
+            <span class="switch__track"><span class="switch__knob"></span></span>
+            <span class="switch__label" data-net-label>Airplane mode</span>
+          </label>
+        </div>
+        <div class="outbox" aria-live="polite">
+          <div class="outbox__head"><span>Outbox</span><b class="mono" data-outbox-count>0 pending</b></div>
+          <ul class="outbox__list" data-outbox></ul>
+          <span class="demo-note demo-note--inline">Demo data</span>
+          <div class="outbox__server"><span class="dot" data-server-dot></span><span data-server-label>Server unreachable · working locally</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RULES ============ -->
+    <section class="rules">
+      <div class="wrap">
+        <h2 class="h2">The rules paper never enforced.</h2>
+      </div>
+      <ul class="rules__list wrap" data-rules>
+        <li><b>Missing a mandatory field?</b><span>The section cannot be signed. The screen names every missing field and how to resolve it. Same validator offline and on the server.</span></li>
+        <li><b>Open defect, not deferred?</b><span>Preflight cannot be signed until it is rectified by maintenance or deferred against a library MEL/CDL item.</span></li>
+        <li><b>MEL deadline expired?</b><span>The ATL is hard-blocked for everyone except maintenance staff. No "continue anyway".</span></li>
+        <li><b>First flight of the UTC day?</b><span>Tyre pressures are required. Later flights that day carry them over, marked as carried.</span></li>
+        <li><b>Device clock drifting?</b><span>Offsets over 60 seconds against the server are flagged on the record and in the admin panel.</span></li>
+        <li><b>Signed by mistake?</b><span>Signed records never change. Corrections go through an Amendment linked to the original, which stays visible.</span></li>
+      </ul>
+    </section>
+
+    <!-- ============ MEL ============ -->
+    <section class="mel" data-mel>
+      <div class="wrap mel__grid">
+        <div>
+          <h2 class="h2">Deadlines the crew doesn't have to count.</h2>
+          <p class="lede">Defer against the operator's own MEL/CDL library and eATL calculates the deadline by category. The day of discovery doesn't count. The Deferred Defect List updates itself.</p>
+          <dl class="mel__facts">
+            <div><dt>Discovered</dt><dd class="mono">24 OCT 2026</dd></div>
+            <div><dt>Category</dt><dd class="mono">C · 10 days</dd></div>
+            <div><dt>Expires</dt><dd class="mono">03 NOV 2026 23:59:59Z</dd></div>
+          </dl>
+        </div>
+        <div>
+        <span class="demo-note demo-note--inline">Demo data · example deferral</span>
+        <div class="cal" data-cal aria-label="Deferral calendar: interval runs from 25 October to 3 November"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREENS ============ -->
+    <section class="screens" id="screens" data-screens>
+      <div class="screens__pin">
+        <div class="wrap screens__head">
+          <h2 class="h2">Built for a cockpit, used on the ramp.</h2>
+          <p class="lede">iPad in landscape for the crew and engineers, the same app in the browser, and a web panel for CAMO and administrators.</p>
+        </div>
+        <div class="screens__rail" data-rail>
+          <!-- iPad captures (2160×1620 originals in "assets/iPad screens/", resized to 1440×1080 here) -->
+          <figure class="shot"><div class="shot__frame"><img src="assets/screens/01-sign-in.png" alt="eATL sign-in on iPad, with offline unlock by PIN" loading="lazy" data-slot></div><figcaption>Sign in, or unlock offline with PIN</figcaption></figure>
+          <figure class="shot"><div class="shot__frame"><img src="assets/screens/02-fleet.jpg" alt="Fleet overview: choose the aircraft you are flying" loading="lazy" data-slot></div><figcaption>Fleet overview</figcaption></figure>
+          <figure class="shot"><div class="shot__frame"><img src="assets/screens/03-records.png" alt="Technical log of one aircraft with its ATL records and statuses" loading="lazy" data-slot></div><figcaption>Records per aircraft</figcaption></figure>
+          <figure class="shot"><div class="shot__frame"><img src="assets/screens/04-preflight.png" alt="Preflight: defects carried over, oil and fuel uplift, tire pressure" loading="lazy" data-slot></div><figcaption>Preflight: oil, fuel, tire pressure</figcaption></figure>
+          <figure class="shot"><div class="shot__frame"><img src="assets/screens/05-flight-data.jpg" alt="Flight and Flight Data: passengers, crew, block and flight times" loading="lazy" data-slot></div><figcaption>Flight &amp; Flight Data</figcaption></figure>
+          <figure class="shot"><div class="shot__frame"><img src="assets/screens/06-engine.png" alt="Engine parameters: ambient values and per-engine readings" loading="lazy" data-slot></div><figcaption>Engine parameters</figcaption></figure>
+          <figure class="shot"><div class="shot__frame"><img src="assets/screens/07-all-weather.jpg" alt="All Weather Operations section with validation" loading="lazy" data-slot></div><figcaption>All Weather Operations</figcaption></figure>
+          <figure class="shot"><div class="shot__frame"><img src="assets/screens/08-review.png" alt="Review: section status, signatures and the hash chain" loading="lazy" data-slot></div><figcaption>Review and signatures</figcaption></figure>
+          <figure class="shot"><div class="shot__frame"><img src="assets/screens/09-paper-form.jpg" alt="Entry typed in from the paper backup form" loading="lazy" data-slot></div><figcaption>Paper backup form</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ROLES ============ -->
+    <section class="roles" id="roles">
+      <div class="wrap">
+        <h2 class="h2">Everyone signs only what they own.</h2>
+        <div class="table-wrap">
+          <table class="matrix">
+            <thead>
+              <tr><th scope="col"></th><th scope="col">Commander</th><th scope="col">Maintenance staff</th><th scope="col">CAMO staff</th><th scope="col">Administrator</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Preflight</th><td class="y">Fill &amp; sign</td><td class="y">Fill &amp; sign</td><td>Read</td><td class="y">Full</td></tr>
+              <tr><th scope="row">Flight log</th><td class="y">Fill &amp; sign</td><td>Read</td><td>Read</td><td class="y">Full</td></tr>
+              <tr><th scope="row">Rectify, close, CRS</th><td>—</td><td class="y">Part-66, signature, stamp</td><td>—</td><td>—</td></tr>
+              <tr><th scope="row">MEL/CDL deferral</th><td class="y">From library</td><td class="y">From library</td><td>—</td><td>—</td></tr>
+              <tr><th scope="row">Next maintenance, extensions</th><td>—</td><td>—</td><td class="y">Web panel</td><td class="y">Full</td></tr>
+              <tr><th scope="row">MEL/CDL library</th><td>—</td><td>—</td><td class="y">Maintain</td><td class="y">Maintain</td></tr>
+              <tr><th scope="row">Void / Amendment</th><td class="y">Own records</td><td>—</td><td class="y">Yes</td><td class="y">Yes</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="footnote">SIC is named on every flight and can read the record, but fills and signs nothing.</p>
+      </div>
+    </section>
+
+    <!-- ============ PLATFORM ============ -->
+    <section class="platform">
+      <div class="wrap platform__grid">
+        <h2 class="h2">One system, every desk it touches.</h2>
+        <dl class="platform__list">
+          <div><dt>iPad app</dt><dd>Landscape-first, fully offline, QR camera, signatures drawn with finger or Pencil.</dd></div>
+          <div><dt>Browser client</dt><dd>The same app as an installable web app, with the same offline database and sync.</dd></div>
+          <div><dt>Web admin</dt><dd>Fleet, per-aircraft field configuration, MEL/CDL library, next maintenance, override monitor.</dd></div>
+          <div><dt>PDF to CAMO</dt><dd>Every closed record is rendered to PDF, archived on the server and e-mailed to CAMO.</dd></div>
+          <div><dt>Excel reports</dt><dd>Oil and fuel consumption, tyre pressure trends and defect reporting, all exportable.</dd></div>
+          <div><dt>Multi-operator</dt><dd>Each operator is its own tenant, with headers, logos and CAMO approval numbers per operating entity.</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section class="cta" id="contact" data-cta>
+      <svg class="cta__jet" viewBox="0 0 600 640" aria-hidden="true" data-cta-jet><use href="#jet"/></svg>
+      <div class="wrap cta__inner">
+        <h2 class="cta__title">Bring your tech log on board.</h2>
+        <p class="lede">Tell us about your fleet and how your crews log flights today. We'll walk you through eATL on your own aircraft types.</p>
+        <a class="btn btn--primary btn--lg" href="#" data-mail data-mail-show>Write to us</a>
+        <p class="cta__addr mono" data-mail-text></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot__inner">
+      <span class="foot__brand"><img src="assets/app-mark.png" alt="" width="24" height="24"> eATL · Electronic Aircraft Technical Log</span>
+      <span>by NextBridge IT</span>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script src="js/site.js"></script>
+</body>
+</html>

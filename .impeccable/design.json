@@ -1,0 +1,537 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-24T12:22:14.029Z",
+  "title": "Design System: eATL",
+  "extensions": {
+    "colorMeta": {
+      "night": {
+        "role": "neutral",
+        "displayName": "Apron Night",
+        "canonical": "oklch(16.1% 0.030 253.9)",
+        "tonalRamp": [
+          "#040c17",
+          "#1b2633",
+          "#374352",
+          "#566272",
+          "#768494",
+          "#99a6b8",
+          "#bccbdd",
+          "#e1f0ff"
+        ]
+      },
+      "navy-900": {
+        "role": "neutral",
+        "displayName": "Hangar Navy",
+        "canonical": "oklch(21.5% 0.046 252.7)",
+        "tonalRamp": [
+          "#000b1e",
+          "#14263b",
+          "#30445a",
+          "#4e637b",
+          "#6f849e",
+          "#91a7c2",
+          "#b4cce7",
+          "#dcf1ff"
+        ]
+      },
+      "navy-800": {
+        "role": "neutral",
+        "displayName": "Cockpit Navy",
+        "canonical": "oklch(25.8% 0.061 254.1)",
+        "tonalRamp": [
+          "#000a24",
+          "#0e2642",
+          "#2a4362",
+          "#496383",
+          "#6985a7",
+          "#8ba8cb",
+          "#aeccf1",
+          "#ddf1ff"
+        ]
+      },
+      "navy-700": {
+        "role": "neutral",
+        "displayName": "Deck Navy",
+        "canonical": "oklch(33.3% 0.086 255.8)",
+        "tonalRamp": [
+          "#00072b",
+          "#02244d",
+          "#20426e",
+          "#3f6391",
+          "#6084b5",
+          "#81a8da",
+          "#a5ccff",
+          "#ddf0ff"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Floodlight White",
+        "canonical": "oklch(96.2% 0.010 252.8)",
+        "tonalRamp": [
+          "#080b0f",
+          "#22252a",
+          "#3e4247",
+          "#5d6267",
+          "#7e8388",
+          "#a1a5ab",
+          "#c5cacf",
+          "#eaeff5"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Mist",
+        "canonical": "oklch(81.3% 0.036 252.3)",
+        "tonalRamp": [
+          "#020c1a",
+          "#182636",
+          "#344355",
+          "#536375",
+          "#738498",
+          "#95a7bb",
+          "#b9cbe0",
+          "#def1ff"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Haze",
+        "canonical": "oklch(67.5% 0.051 253.4)",
+        "tonalRamp": [
+          "#000b20",
+          "#12263d",
+          "#2e435d",
+          "#4d637e",
+          "#6d85a1",
+          "#8fa7c5",
+          "#b3ccea",
+          "#dcf1ff"
+        ]
+      },
+      "brand": {
+        "role": "primary",
+        "displayName": "eATL Cobalt",
+        "canonical": "oklch(51.8% 0.116 250.8)",
+        "tonalRamp": [
+          "#00082b",
+          "#00235a",
+          "#00437c",
+          "#2564a0",
+          "#4886c5",
+          "#6baaeb",
+          "#9fceff",
+          "#dbf1ff"
+        ]
+      },
+      "brand-hi": {
+        "role": "primary",
+        "displayName": "Floodlit Cobalt",
+        "canonical": "oklch(67.7% 0.122 252.0)",
+        "tonalRamp": [
+          "#00082b",
+          "#00215d",
+          "#004280",
+          "#2363a4",
+          "#4785c9",
+          "#6aa9ef",
+          "#a1cdff",
+          "#dcf1ff"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Log Paper",
+        "canonical": "oklch(98.4% 0.004 106.5)",
+        "tonalRamp": [
+          "#0b0b09",
+          "#252523",
+          "#424240",
+          "#61615f",
+          "#828280",
+          "#a5a5a2",
+          "#c9c9c6",
+          "#efefec"
+        ]
+      },
+      "paper-2": {
+        "role": "neutral",
+        "displayName": "Paper Shade",
+        "canonical": "oklch(95.4% 0.003 247.9)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#242527",
+          "#414244",
+          "#606163",
+          "#818284",
+          "#a3a5a7",
+          "#c7c9cb",
+          "#edeff1"
+        ]
+      },
+      "paper-ink": {
+        "role": "neutral",
+        "displayName": "Log Ink",
+        "canonical": "oklch(29.1% 0.064 250.3)",
+        "tonalRamp": [
+          "#000a24",
+          "#082643",
+          "#264463",
+          "#456485",
+          "#6586a8",
+          "#87a9cc",
+          "#aacdf2",
+          "#dbf1ff"
+        ]
+      },
+      "paper-ink-2": {
+        "role": "neutral",
+        "displayName": "Faded Ink",
+        "canonical": "oklch(47.8% 0.048 253.1)",
+        "tonalRamp": [
+          "#000b1f",
+          "#13263c",
+          "#2f435b",
+          "#4e637c",
+          "#6e849f",
+          "#90a7c3",
+          "#b4cce8",
+          "#dcf1ff"
+        ]
+      },
+      "paper-rule": {
+        "role": "neutral",
+        "displayName": "Ruling",
+        "canonical": "oklch(88.9% 0.013 255.5)",
+        "tonalRamp": [
+          "#080b11",
+          "#21252b",
+          "#3e4249",
+          "#5d6269",
+          "#7d838a",
+          "#a0a6ad",
+          "#c4cad2",
+          "#e9eff7"
+        ]
+      },
+      "taxi": {
+        "role": "tertiary",
+        "displayName": "Taxi-Line Yellow",
+        "canonical": "oklch(80.6% 0.152 88.2)",
+        "tonalRamp": [
+          "#190600",
+          "#3d1c00",
+          "#633800",
+          "#845800",
+          "#a87b00",
+          "#c79f30",
+          "#e0c788",
+          "#faeed1"
+        ]
+      },
+      "ok": {
+        "role": "semantic",
+        "displayName": "Signed Green",
+        "canonical": "oklch(65.2% 0.137 156.3)",
+        "tonalRamp": [
+          "#001300",
+          "#003404",
+          "#00551f",
+          "#00773f",
+          "#1f9a5f",
+          "#54bd82",
+          "#9bdab2",
+          "#daf7e4"
+        ]
+      },
+      "ok-paper": {
+        "role": "semantic",
+        "displayName": "Signed Green on Paper",
+        "canonical": "oklch(51.5% 0.110 156.8)",
+        "tonalRamp": [
+          "#001300",
+          "#00330b",
+          "#005228",
+          "#157347",
+          "#409667",
+          "#65ba89",
+          "#9adab3",
+          "#daf7e4"
+        ]
+      },
+      "warn": {
+        "role": "semantic",
+        "displayName": "Deferral Amber",
+        "canonical": "oklch(75.9% 0.139 75.6)",
+        "tonalRamp": [
+          "#1d0300",
+          "#451300",
+          "#6a3100",
+          "#8d5200",
+          "#b17400",
+          "#d49836",
+          "#eac28a",
+          "#ffebd1"
+        ]
+      },
+      "bad": {
+        "role": "semantic",
+        "displayName": "Broken Red",
+        "canonical": "oklch(63.5% 0.185 31.2)",
+        "tonalRamp": [
+          "#240000",
+          "#520000",
+          "#860000",
+          "#b21e08",
+          "#d84e39",
+          "#ec8471",
+          "#fcb5a7",
+          "#ffe5de"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "rgba(160, 192, 228, 0.14)"
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Strong Hairline",
+        "canonical": "rgba(160, 192, 228, 0.28)"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero and CTA headlines only; width applied via font-stretch 115-118%."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Every section heading; max 16ch, balanced."
+      },
+      "statement": {
+        "displayName": "Statement",
+        "purpose": "The single scroll-revealed manifesto paragraph."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Step names, scan results, rules questions, matrix headers, platform terms."
+      },
+      "lede": {
+        "displayName": "Lede",
+        "purpose": "One supporting paragraph under each headline, in Mist."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running prose."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels inside ATL sheet cells."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Every operational value: registrations, ICAO codes, UTC times, quantities, hashes."
+      },
+      "marker": {
+        "displayName": "Marker",
+        "purpose": "AUTO / PREV / CARRIED / CALC field markers and status pills, uppercase."
+      }
+    },
+    "shadows": [
+      {
+        "name": "paper-lift",
+        "value": "0 2px 4px rgba(0,0,0,.2), 0 30px 60px -12px rgba(0,0,0,.6)",
+        "purpose": "The ATL sheet."
+      },
+      {
+        "name": "placard-lift",
+        "value": "0 30px 60px -18px rgba(0,0,0,.7)",
+        "purpose": "The QR placard."
+      },
+      {
+        "name": "device-bezel",
+        "value": "inset 0 0 0 1.5px #3a4352, 0 40px 80px -20px rgba(0,0,0,.7)",
+        "purpose": "Graphite iPad and screenshot frames."
+      },
+      {
+        "name": "aircraft-cast",
+        "value": "drop-shadow(18px 26px 24px rgba(0,0,0,.55))",
+        "purpose": "CSS filter on the jet over the apron."
+      },
+      {
+        "name": "scan-glow",
+        "value": "0 0 18px 2px rgba(92,155,224,.6)",
+        "purpose": "Moving QR scanline only."
+      },
+      {
+        "name": "nav-glass",
+        "value": "background rgba(5,14,26,.78); backdrop-filter blur(14px) saturate(1.3)",
+        "purpose": "Scrolled navigation bar."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "All CSS state transitions (0.25s controls, 0.4-0.5s list and block states)."
+      },
+      {
+        "name": "settle",
+        "value": "GSAP expo.out, 0.5-1.1s",
+        "purpose": "Entrances: sheet arrival, pane content, outbox items, CTA headline."
+      },
+      {
+        "name": "scene-scrub",
+        "value": "ScrollTrigger pin + scrub 0.6-0.9, power2.inOut defaults",
+        "purpose": "Pinned hero (jet to record), lifecycle tabs, screens rail, hash chain."
+      },
+      {
+        "name": "pop",
+        "value": "GSAP back.out(2-3), 0.3s",
+        "purpose": "Hotspot dots and the signed seal."
+      },
+      {
+        "name": "smooth-scroll",
+        "value": "Lenis duration 1.15, easeOutQuart",
+        "purpose": "Page scroll; disabled under reduced motion."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "static end states",
+        "purpose": "Every scene renders its complete final state when prefers-reduced-motion is set."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact",
+        "value": "860px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Paper capsule on night; the one action per scene.",
+      "html": "<a class=\"ds-btn ds-btn-primary\" href=\"#\">Talk to us</a>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border-radius:999px;font-family:Geist,\"Helvetica Neue\",Arial,sans-serif;font-weight:600;font-size:1rem;text-decoration:none;border:1px solid transparent;transition:background-color .25s cubic-bezier(.16,1,.3,1),color .25s cubic-bezier(.16,1,.3,1),transform .25s cubic-bezier(.16,1,.3,1)}.ds-btn-primary{background:var(--paper,#fafaf7);color:var(--paper-ink,#0f2d4a)}.ds-btn-primary:hover{background:#fff;color:var(--brand,#2d6ba8)}.ds-btn:active{transform:translateY(1px)}.ds-btn:focus-visible{outline:2px solid var(--brand-hi,#5c9be0);outline-offset:3px}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Hairline capsule for the secondary path.",
+      "html": "<a class=\"ds-btn-ghost\" href=\"#\">See how it works</a>",
+      "css": ".ds-btn-ghost{display:inline-flex;align-items:center;min-height:48px;padding:0 24px;border-radius:999px;font-family:Geist,\"Helvetica Neue\",Arial,sans-serif;font-weight:600;font-size:1rem;text-decoration:none;color:var(--ink,#eef3f9);border:1px solid var(--line-strong,rgba(160,192,228,.28));background:none;transition:border-color .25s cubic-bezier(.16,1,.3,1),background-color .25s cubic-bezier(.16,1,.3,1)}.ds-btn-ghost:hover{border-color:var(--ink-2,#b2c4d9);background:rgba(255,255,255,.04)}.ds-btn-ghost:active{transform:translateY(1px)}.ds-btn-ghost:focus-visible{outline:2px solid var(--brand-hi,#5c9be0);outline-offset:3px}"
+    },
+    {
+      "name": "Choice Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Outlined capsule that inverts to white when selected.",
+      "html": "<div style=\"display:flex;gap:10px\"><button class=\"ds-chip is-on\">Scan YU-RDA</button><button class=\"ds-chip\">Scan YU-RDB</button></div>",
+      "css": ".ds-chip{border:1px solid var(--line-strong,rgba(160,192,228,.28));background:transparent;border-radius:999px;padding:9px 16px;font:inherit;font-size:.92rem;color:var(--ink-2,#b2c4d9);cursor:pointer;transition:color .25s cubic-bezier(.16,1,.3,1),border-color .25s cubic-bezier(.16,1,.3,1),background-color .25s cubic-bezier(.16,1,.3,1)}.ds-chip:hover{color:var(--ink,#eef3f9);border-color:var(--ink-3,#8199b6)}.ds-chip.is-on{background:var(--ink,#eef3f9);color:var(--night,#050e1a);border-color:var(--ink,#eef3f9)}.ds-chip:focus-visible{outline:2px solid var(--brand-hi,#5c9be0);outline-offset:3px}"
+    },
+    {
+      "name": "Status Pills and Field Markers",
+      "kind": "chip",
+      "refersTo": "status-pill",
+      "description": "Mono uppercase status capsules and AUTO / CALC field markers on paper.",
+      "html": "<div class=\"ds-paper-row\"><span class=\"ds-pill\">Draft</span><span class=\"ds-pill ds-pill-ok\">Preflight signed</span><span class=\"ds-pill ds-pill-warn\">Deferred · MEL C</span><em class=\"ds-tag\">Auto</em><em class=\"ds-tag ds-tag-calc\">Calc</em></div>",
+      "css": ".ds-paper-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--paper,#fafaf7);padding:16px;border-radius:14px}.ds-pill{display:inline-flex;align-items:center;gap:6px;font-family:\"JetBrains Mono\",monospace;font-size:.72rem;font-weight:500;text-transform:uppercase;letter-spacing:.04em;padding:4px 10px;border-radius:999px;background:var(--paper-2,#eef0f2);color:var(--paper-ink-2,#4a5f78)}.ds-pill::before{content:\"\";width:7px;height:7px;border-radius:50%;background:currentColor}.ds-pill-ok{background:rgba(52,168,108,.14);color:var(--ok-paper,#1f7a4d)}.ds-pill-warn{background:rgba(227,163,58,.18);color:#94600c}.ds-tag{font-style:normal;font-family:\"JetBrains Mono\",monospace;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--brand,#2d6ba8);border:1px solid currentColor;border-radius:4px;padding:1px 5px}.ds-tag-calc{color:var(--paper-ink-2,#4a5f78);border-style:dashed}"
+    },
+    {
+      "name": "Record Block",
+      "kind": "card",
+      "refersTo": "record-card",
+      "description": "Flat navy card for one signature in the hash chain.",
+      "html": "<div class=\"ds-block\"><span class=\"ds-block-role\">Commander · Preflight</span><b class=\"ds-block-time\">06:31Z</b><span class=\"ds-block-hash\">prev 41ad…c3e2</span><span class=\"ds-block-hash ds-ok\">hash 9f2c…7a01</span></div>",
+      "css": ".ds-block{width:260px;padding:20px 20px 18px;border-radius:14px;background:var(--navy-800,#0c2440);border:1px solid var(--line-strong,rgba(160,192,228,.28));display:flex;flex-direction:column;gap:4px;color:var(--ink,#eef3f9);font-family:Geist,sans-serif;transition:border-color .4s cubic-bezier(.16,1,.3,1),background-color .4s cubic-bezier(.16,1,.3,1)}.ds-block:hover{border-color:var(--brand-hi,#5c9be0)}.ds-block-role{font-size:.85rem;color:var(--ink-2,#b2c4d9)}.ds-block-time{font-family:\"JetBrains Mono\",monospace;font-size:1.4rem;font-weight:700;margin-bottom:8px}.ds-block-hash{font-family:\"JetBrains Mono\",monospace;font-size:.78rem;color:var(--ink-3,#8199b6)}.ds-ok{color:var(--ok,#34a86c)}"
+    },
+    {
+      "name": "Airplane Mode Switch",
+      "kind": "input",
+      "refersTo": "panel",
+      "description": "Capsule toggle; on state fills amber for offline.",
+      "html": "<label class=\"ds-switch\"><input type=\"checkbox\" checked><span class=\"ds-track\"><span class=\"ds-knob\"></span></span><span>Airplane mode</span></label>",
+      "css": ".ds-switch{display:inline-flex;align-items:center;gap:14px;cursor:pointer;color:var(--ink,#eef3f9);font-family:Geist,sans-serif;font-weight:600}.ds-switch input{position:absolute;opacity:0;width:1px;height:1px}.ds-track{width:64px;height:36px;border-radius:36px;background:var(--navy-700,#143661);position:relative;transition:background-color .3s cubic-bezier(.16,1,.3,1)}.ds-knob{position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:var(--ink,#eef3f9);transition:transform .35s cubic-bezier(.16,1,.3,1)}.ds-switch input:checked+.ds-track{background:var(--warn,#e3a33a)}.ds-switch input:checked+.ds-track .ds-knob{transform:translateX(28px)}.ds-switch input:focus-visible+.ds-track{outline:2px solid var(--brand-hi,#5c9be0);outline-offset:3px}"
+    },
+    {
+      "name": "Top Navigation",
+      "kind": "nav",
+      "refersTo": "button-sm",
+      "description": "Fixed bar; glass night with a hairline once scrolled.",
+      "html": "<header class=\"ds-nav\"><a class=\"ds-nav-brand\" href=\"#\">eATL</a><nav class=\"ds-nav-links\"><a href=\"#\">How it works</a><a href=\"#\">Integrity</a><a href=\"#\">Screens</a><a href=\"#\">Roles</a></nav><a class=\"ds-nav-cta\" href=\"#\">Contact us</a></header>",
+      "css": ".ds-nav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:14px 24px;background:rgba(5,14,26,.78);backdrop-filter:blur(14px) saturate(1.3);border-bottom:1px solid var(--line,rgba(160,192,228,.14));font-family:Geist,sans-serif}.ds-nav-brand{font-family:Archivo,sans-serif;font-weight:800;font-stretch:110%;font-size:1.3rem;letter-spacing:-.02em;color:var(--ink,#eef3f9);text-decoration:none}.ds-nav-links{display:flex;gap:28px}.ds-nav-links a{color:var(--ink-2,#b2c4d9);text-decoration:none;font-size:.95rem;transition:color .2s}.ds-nav-links a:hover{color:var(--ink,#eef3f9)}.ds-nav-cta{display:inline-flex;align-items:center;min-height:40px;padding:0 18px;border-radius:999px;background:var(--paper,#fafaf7);color:var(--paper-ink,#0f2d4a);font-weight:600;font-size:.92rem;text-decoration:none}.ds-nav-cta:hover{background:#fff;color:var(--brand,#2d6ba8)}.ds-nav a:focus-visible{outline:2px solid var(--brand-hi,#5c9be0);outline-offset:3px}"
+    },
+    {
+      "name": "ATL Sheet",
+      "kind": "custom",
+      "refersTo": "atl-sheet",
+      "description": "Signature component: rotated paper record with ruled mono cells.",
+      "html": "<article class=\"ds-sheet\"><header class=\"ds-sheet-head\"><span class=\"ds-sheet-label\">Aircraft Technical Log</span><strong class=\"ds-sheet-no\">YU-RDA-000001</strong></header><div class=\"ds-sheet-grid\"><div class=\"ds-cell\"><span>Aircraft</span><b>YU-RDA · C560XL</b></div><div class=\"ds-cell\"><span>Date (UTC)</span><b>24 OCT 2026</b></div><div class=\"ds-cell ds-hit\"><span>Tyre · NLG</span><b>120 psi</b></div></div></article>",
+      "css": ".ds-sheet{width:440px;background:var(--paper,#fafaf7);color:var(--paper-ink,#0f2d4a);border-radius:18px;padding:26px 26px 22px;transform:rotate(-3deg);box-shadow:0 2px 4px rgba(0,0,0,.2),0 30px 60px -12px rgba(0,0,0,.6);font-family:Geist,sans-serif}.ds-sheet-head{padding-bottom:14px;border-bottom:2px solid var(--paper-ink,#0f2d4a)}.ds-sheet-label{display:block;font-size:.78rem;color:var(--paper-ink-2,#4a5f78);font-weight:500}.ds-sheet-no{display:block;font-family:\"JetBrains Mono\",monospace;font-size:1.25rem}.ds-sheet-grid{display:grid;grid-template-columns:repeat(3,1fr);border-left:1px solid var(--paper-rule,#d5dbe3)}.ds-cell{padding:8px 10px 9px;border-right:1px solid var(--paper-rule,#d5dbe3);border-bottom:1px solid var(--paper-rule,#d5dbe3);transition:background-color .4s}.ds-cell:hover,.ds-hit{background:#e7f0fa}.ds-cell span{display:block;font-size:.72rem;color:var(--paper-ink-2,#4a5f78);line-height:1.3}.ds-cell b{display:block;font-family:\"JetBrains Mono\",monospace;font-size:.92rem;font-weight:500}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Night Apron Logbook",
+    "overview": "The whole system is a parked aircraft under floodlight at night and the paper log that belongs to it. The ground is deep apron navy, lit by a soft blue floodlight wash with faint concrete-slab seams and grain; on it sit two kinds of object: the aircraft (cool silver, lifted by a soft cast shadow) and the record (warm white paper, slightly rotated, lifted the same way). Everything the product proves (fields, times, hashes, registrations) is set in monospace on paper or in hairline-ruled navy panels, so the page reads as an operational document rather than a brochure.\n\nThe category is honoured on purpose: deep-navy aviation SaaS, iPad frames, a scroll-told product story. What lifts it is fidelity. Scenes pin and scrub with scroll instead of stacking as feature cards; the aircraft drives the record through leader lines; status color appears only when it means something. Density is generous in the dark sections (one idea per screen-height) and tight, ledger-like, inside the paper and device surfaces.\n\nThe world alternates its ground deliberately: night, navy-900 bands, two full-bleed paper sections that read like the printed log itself, and a closing brand-blue field.",
+    "keyCharacteristics": [
+      "Night navy ground with tonal bands rather than cards on cards.",
+      "Paper surfaces carry the record; they are the only warm-white objects.",
+      "Archivo set wide and heavy for display; Geist for prose; JetBrains Mono for every operational value.",
+      "Blue is the system's voice (actions, leader lines, AUTO/PREV/CARRIED markers); green, amber, red are strictly semantic.",
+      "Taxi-line yellow exists only as ground marking.",
+      "Motion is scroll-scrubbed and pinned, with a long expo-out settle."
+    ],
+    "rules": [
+      {
+        "name": "The Ground Marking Rule",
+        "body": "Taxi-line yellow appears only as painted ground (lead-in line, stop bar, stand number). It is never a UI accent, button or highlight.",
+        "section": "colors"
+      },
+      {
+        "name": "The Status Means Status Rule",
+        "body": "Green, amber and red appear only where the product state they represent is being shown. A section that has no status has none of them.",
+        "section": "colors"
+      },
+      {
+        "name": "The Lit Blue Rule",
+        "body": "On dark ground, interactive and connecting blue is the floodlit cobalt; the deeper cobalt is reserved for fills and for blue on paper.",
+        "section": "colors"
+      },
+      {
+        "name": "The Data Is Mono Rule",
+        "body": "Any value an operator would write in the log (registration, ICAO code, UTC time, quantity, hash, record number) is set in JetBrains Mono with tabular figures. Prose never is.",
+        "section": "typography"
+      },
+      {
+        "name": "The Wide Means Loud Rule",
+        "body": "Archivo's width scales with importance: 120% for painted ground text, 115 to 118% for display, 112% for headlines, 105 to 110% for titles and brand.",
+        "section": "typography"
+      },
+      {
+        "name": "The Objects Lift, The Ground Doesn't Rule",
+        "body": "Only things that physically exist on the apron (aircraft, paper, devices) get shadows. UI panels, cards and controls on navy stay flat and use hairlines.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do set every operational value (registration, ICAO, UTC time, quantity, hash) in JetBrains Mono with tabular figures.",
+      "Do use the floodlit cobalt for leader lines, active indicators and focus on dark ground, and the deeper cobalt for fills and blue on paper.",
+      "Do separate dark sections by ground tone (night, navy-900) and hairlines rather than by shadows or nested cards.",
+      "Do lift and slightly rotate physical objects (paper, placard, aircraft) with the long soft shadows from the Shadow Vocabulary.",
+      "Do label any synthetic record shown on the page as demo data, in small Mist or Faded Ink text beside it.",
+      "Do tell a mechanism with a pinned or scroll-scrubbed scene, settling on the expo-out curve, and give every scene a complete static end state under reduced motion."
+    ],
+    "donts": [
+      "Don't use taxi-line yellow for anything that is not ground marking.",
+      "Don't use green, amber or red where no status is being shown.",
+      "Don't add shadows to dark UI panels, cards or controls; only physical objects lift.",
+      "Don't set prose or headings in mono, or operational values in Geist.",
+      "Don't set display type at Archivo's normal width; the system's display voice is wide (105% and up) and heavy (700 and up)."
+    ]
+  }
+}

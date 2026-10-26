@@ -1,0 +1,10 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{margin:0;width:1440px;height:900px;background:#0A0A0A;color:#FFB000;font-family:'Arial Narrow',Arial;overflow:hidden}
+.l{position:absolute;left:160px;right:80px;height:1px;background:#3a2a00}
+.n{position:absolute;left:60px;font-size:16px}
+.t{position:absolute;height:2px;background:#FFB000}
+.plate{position:absolute;left:160px;top:80px;background:#FFB000;color:#0A0A0A;font-size:120px;font-weight:900;padding:10px 30px}
+.cta{position:absolute;right:80px;top:100px;border:2px solid #FFB000;padding:16px 28px;font-size:26px}
+</style></head><body><div class="plate">eATL</div><div class="cta">CONTACT</div>
+<script>for(let i=0;i<14;i++){const y=300+i*42;document.write(`<div class="n" style="top:${y-10}px">${String(i+1).padStart(2,'0')}</div><div class="l" style="top:${y}px"></div><div class="t" style="top:${y}px;left:${300+i*20}px;width:${500+(i%4)*120}px;${i==5?'background:transparent;border-top:2px dashed #FFB000':''}"></div>`)}</script>
+</body></html>

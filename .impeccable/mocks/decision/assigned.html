@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{margin:0;width:1440px;height:900px;background:#141619;font-family:'Arial Narrow',Arial,sans-serif;color:#ECE8DE;overflow:hidden}
+.grid{position:absolute;inset:40px;display:grid;grid-template-columns:repeat(36,1fr);grid-auto-rows:44px;gap:4px}
+.f{background:#1e2125;border-radius:3px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:28px;position:relative}
+.f::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#000}
+.on{background:#ECE8DE;color:#141619}.y{background:#F2B600;color:#141619}.g{background:#1F7A4D}.b{background:#2D6BA8}.r{background:#C8361F}
+h1{position:absolute;left:40px;top:420px;font-size:180px;margin:0;letter-spacing:-4px;color:#ECE8DE}
+p{position:absolute;left:44px;top:640px;font-size:30px;width:700px;color:#bdb8ad}
+.cta{position:absolute;left:44px;top:760px;background:#F2B600;color:#141619;font-size:28px;font-weight:700;padding:22px 40px}
+</style></head><body><div class="grid" id="g"></div>
+<h1>eATL</h1><p>The aircraft technical log, rebuilt for the cockpit. Offline. Signed. Hash-chained.</p><div class="cta">CONTACT &rarr;</div>
+<script>
+const g=document.getElementById('g');const rows=[
+'YU-RDA-000001  PREFLIGHT  SIGNED',
+'BLOCK OFF 06:42 TAKE-OFF 06:55   ',
+'DEFECT 32-41   DEFERRED   MEL C  ',
+'CLOSED  HASH 9F2C..A01           '];
+const cls=['on','on','y','g'];
+rows.forEach((r,i)=>{for(let c=0;c<36;c++){const d=document.createElement('div');const ch=r[c]||' ';d.className='f '+(ch.trim()?cls[i]:'');d.textContent=ch;g.appendChild(d)}});
+for(let i=0;i<36*4;i++){const d=document.createElement('div');d.className='f';g.appendChild(d)}
+// aircraft silhouette from tiles on right
+const plane=[[0,0,0,0,1,0,0,0],[0,0,0,1,1,0,0,0],[1,1,1,1,1,1,1,1],[0,0,0,1,1,0,0,0],[0,0,1,1,1,1,0,0]];
+const cells=g.children;plane.forEach((row,ri)=>row.forEach((v,ci)=>{if(v){const idx=(5+ri)*36+24+ci;cells[idx]&&(cells[idx].className='f b')}}));
+</script></body></html>
