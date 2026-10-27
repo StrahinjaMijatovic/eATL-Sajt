@@ -108,16 +108,17 @@
 
   <header class="nav" data-nav>
     <a class="nav__brand" href="#top" aria-label="eATL home">
-      <img src="assets/app-mark.png" alt="" width="34" height="34">
+      <img src="assets/app-mark-68.png" alt="" width="34" height="34">
       <span>eATL</span>
     </a>
-    <nav class="nav__links" aria-label="Primary">
+    <button class="nav__menu" type="button" aria-expanded="false" aria-controls="nav-links" data-menu>Menu</button>
+    <nav class="nav__links" id="nav-links" aria-label="Primary">
       <a href="#lifecycle">How it works</a>
-      <a href="#trust">Integrity</a>
+      <a href="#integrity">Integrity</a>
       <a href="#screens">Screens</a>
       <a href="#roles">Roles</a>
     </nav>
-    <a class="btn btn--primary btn--sm" href="#contact" data-mail>Contact us</a>
+    <a class="btn btn--primary btn--sm" href="#contact" data-mail>Talk to us</a>
   </header>
 
   <main id="main">
@@ -243,7 +244,7 @@
           <i class="cloud" style="left:4%;top:36%;width:42vw"></i>
         </div>
         <div class="runway" data-runway aria-hidden="true">
-          <svg viewBox="0 0 240 2400" preserveAspectRatio="xMidYMin meet">
+          <svg viewBox="0 0 240 2400" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
             <defs>
               <radialGradient id="als" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fffbe8"/><stop offset=".35" stop-color="#ffe9a8" stop-opacity=".9"/><stop offset="1" stop-color="#ffd76a" stop-opacity="0"/></radialGradient>
             </defs>
@@ -286,7 +287,7 @@
 
         <!-- preflight close-up: main wheel with an inflation gauge on the valve -->
         <div class="closeup" data-tyre aria-hidden="true">
-          <svg viewBox="0 0 640 420">
+          <svg viewBox="0 0 640 420" aria-hidden="true" focusable="false">
             <defs>
               <radialGradient id="tyRubber" cx="42%" cy="38%" r="62%"><stop offset="0" stop-color="#3a3f47"/><stop offset=".7" stop-color="#1c1f24"/><stop offset="1" stop-color="#0d0f12"/></radialGradient>
               <linearGradient id="tyRim" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#f2f5f8"/><stop offset=".45" stop-color="#aeb9c6"/><stop offset="1" stop-color="#5f6c7c"/></linearGradient>
@@ -316,7 +317,7 @@
 
         <!-- preflight close-up: engine oil tank sight gauge, uplift poured in -->
         <div class="closeup" data-oil aria-hidden="true">
-          <svg viewBox="0 0 640 420">
+          <svg viewBox="0 0 640 420" aria-hidden="true" focusable="false">
             <defs>
               <linearGradient id="oilTank" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#7d8a9a"/><stop offset=".3" stop-color="#e9eef3"/><stop offset=".6" stop-color="#c3ccd6"/><stop offset="1" stop-color="#6b7887"/></linearGradient>
               <linearGradient id="oilFluid" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#8f6a1d"/><stop offset=".45" stop-color="#e2b752"/><stop offset="1" stop-color="#8a6419"/></linearGradient>
@@ -350,7 +351,7 @@
 
         <!-- engine 2 (PW545), cut away and taken apart module by module -->
         <div class="engine-x" data-engine aria-hidden="true">
-          <svg viewBox="0 0 1000 380">
+          <svg viewBox="0 0 1000 380" aria-hidden="true" focusable="false">
             <defs>
               <linearGradient id="exCowl" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f6f8fa"/><stop offset=".55" stop-color="#d9e0e7"/><stop offset="1" stop-color="#9aa7b6"/></linearGradient>
               <linearGradient id="exSteel" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#dde3ea"/><stop offset=".5" stop-color="#9ba8b7"/><stop offset="1" stop-color="#5d6a7a"/></linearGradient>
@@ -561,6 +562,7 @@
         </ol>
 
         <p class="hero__cue" data-cue>Scroll — watch the aircraft fill its own log</p>
+        <a class="hero__skip" href="#lifecycle">Skip the flight</a>
       </div>
     </section>
 
@@ -573,14 +575,16 @@
     <section class="life" id="lifecycle" data-life>
       <div class="life__pin">
         <div class="life__intro">
-          <h2 class="h2">From chocks-out to closed, in one record.</h2>
-          <ol class="life__steps" data-steps>
-            <li class="is-on"><b>Preflight</b><span>Fuel, oil, tyres, next maintenance and open defects, before every flight.</span></li>
-            <li><b>Flight</b><span>Crew, route, nature of flight, passengers. Commander and SIC on every leg.</span></li>
-            <li><b>Flight Data</b><span>Block OFF, Take-Off, Landing, Block ON in strict order, stored in UTC.</span></li>
-            <li><b>Defects</b><span>Reported with photos, deferred against the MEL/CDL, rectified with a CRS.</span></li>
-            <li><b>Close</b><span>Commander and Technical Staff sign. The record locks and goes to CAMO.</span></li>
-          </ol>
+          <h2 class="h2">From snag to release to service.</h2>
+          <div class="life__track">
+            <i class="life__rail" data-life-rail aria-hidden="true"></i>
+            <ol class="life__steps" data-steps>
+              <li class="is-on"><b>Reported</b><span>The Commander logs the defect on the record, by ATA chapter, with photos. LINE, CAMO and OPS are notified.</span></li>
+              <li><b>Deferred</b><span>Against an item from the operator's MEL/CDL library. eATL calculates the deadline and adds it to the Deferred Defect List (DDL).</span></li>
+              <li><b>Record closed</b><span>Commander and Technical Staff sign. The record locks and goes to CAMO; the defect stays on the DDL and the next flight isn't blocked.</span></li>
+              <li><b>Rectified</b><span>Maintenance staff only: action taken, Part-66 number, signature and company stamp in the <abbr title="Certificate of Release to Service">CRS</abbr> block.</span></li>
+            </ol>
+          </div>
         </div>
 
         <div class="ipad" aria-hidden="true">
@@ -590,54 +594,30 @@
               <div class="app__bar">
                 <span class="mono">YU-RDA-000001</span>
                 <span class="app__route mono">LYBE → LJLJ</span>
-                <span class="pill" data-app-status>Draft</span>
+                <span class="pill" data-app-status>Defect open</span>
               </div>
               <div class="app__tabs" data-app-tabs>
-                <span class="is-on">Preflight</span><span>Flight</span><span>Flight Data</span><span>Defects</span><span>Close</span>
+                <span class="is-on">Defect</span><span>Deferral</span><span>Close</span><span>CRS</span>
               </div>
               <div class="app__panes">
                 <div class="pane is-on" data-pane>
-                  <div class="row"><span>Date (UTC)</span><b class="mono">24 OCT 2026</b></div>
-                  <div class="row"><span>Fuel onboard</span><b class="mono">6 210 lb</b><em class="tag">Auto</em></div>
-                  <div class="row"><span>Fuel type</span><b class="mono">JET-A1</b><em class="tag">Auto</em></div>
-                  <div class="row"><span>Oil uplift</span><b class="mono">OK · 0.5 qt</b></div>
-                  <div class="row"><span>Tyres (first flight UTC day)</span><b class="mono">120 · 165 · 165 psi</b></div>
-                  <div class="row"><span>Next maintenance</span><b class="mono">214:30 FH left</b></div>
-                  <div class="row"><span>Open defects</span><b class="mono ok">None</b></div>
-                  <div class="sign ok">Preflight signed · Commander · 06:31Z</div>
-                </div>
-                <div class="pane" data-pane>
-                  <div class="row"><span>Commander</span><b>M. Petrović</b></div>
-                  <div class="row"><span>SIC</span><b>A. Kovač</b></div>
-                  <div class="row"><span>Nature of flight</span><b>Commercial</b></div>
-                  <div class="row"><span>Passengers M · F · C · I</span><b class="mono">3 · 2 · 0 · 0</b></div>
-                  <div class="row"><span>STW</span><b>J. Ilić</b></div>
-                  <div class="row"><span>From</span><b class="mono">LYBE</b><em class="tag">Carried</em></div>
-                  <div class="row"><span>To</span><b class="mono">LJLJ</b></div>
-                  <div class="row"><span>Flight time since previous ATL</span><b class="mono">1 412:05</b><em class="tag">Prev</em></div>
-                </div>
-                <div class="pane" data-pane>
-                  <div class="timeline">
-                    <div class="timeline__bar"><i data-tl-fill></i></div>
-                    <div class="timeline__marks">
-                      <span><b class="mono">06:42</b>Block OFF</span>
-                      <span><b class="mono">06:55</b>Take-Off</span>
-                      <span><b class="mono">07:41</b>Landing</span>
-                      <span><b class="mono">07:50</b>Block ON</span>
-                    </div>
+                  <div class="defect">
+                    <div class="defect__top"><b class="mono">ATA 32-41</b><span class="pill pill--bad">Open</span></div>
+                    <p>LH MLG brake wear indicator at limit.</p>
+                    <div class="row"><span>Reported by</span><b>M. Petrović · Commander</b></div>
+                    <div class="row"><span>Found</span><b class="mono">24 OCT 2026 07:52Z</b></div>
+                    <div class="row"><span>Photos</span><b class="mono">2 attached</b></div>
+                    <div class="row"><span>Notified</span><b>LINE · CAMO · OPS</b></div>
                   </div>
-                  <div class="row"><span>Block time</span><b class="mono">01:08</b><em class="tag tag--calc">Calc</em></div>
-                  <div class="row"><span>Flight time</span><b class="mono">00:46</b><em class="tag tag--calc">Calc</em></div>
-                  <div class="row"><span>Landings</span><b class="mono">1</b></div>
-                  <div class="row"><span>Fuel at cut-off</span><b class="mono">4 020 lb</b></div>
-                  <div class="row"><span>Fuel used</span><b class="mono">2 190 lb · 1 242 L</b><em class="tag tag--calc">Calc</em></div>
+                  <div class="sign sign--warn">The next Preflight can't be signed until this is deferred or rectified.</div>
                 </div>
                 <div class="pane" data-pane>
                   <div class="defect">
                     <div class="defect__top"><b class="mono">ATA 32-41</b><span class="pill pill--warn">Deferred · MEL C</span></div>
-                    <p>LH MLG brake wear indicator at limit.</p>
+                    <div class="row"><span>MEL item</span><b>32-41 · Brake wear indicator</b></div>
+                    <div class="row"><span>Category</span><b class="mono">C · 10 days</b></div>
                     <div class="row"><span>Deadline</span><b class="mono">03 NOV 2026 23:59:59Z</b><em class="tag tag--calc">Calc</em></div>
-                    <div class="row"><span>Notified</span><b>LINE · CAMO · OPS</b></div>
+                    <div class="row"><span>Deferred by</span><b>M. Petrović · Commander</b></div>
                   </div>
                   <div class="sign ok">Added to the Deferred Defect List. Visible on every Preflight until closed.</div>
                 </div>
@@ -646,8 +626,18 @@
                   <div class="row"><span>Technical Staff · Close</span><b class="ok">Signed 08:20Z</b></div>
                   <div class="row"><span>PDF to CAMO</span><b class="mono">Sent · YU-RDA-000001.pdf</b></div>
                   <div class="row"><span>Hash chain</span><b class="mono ok">4 of 4 intact</b></div>
-                  <div class="row"><span>Next flight</span><b>Not blocked</b></div>
+                  <div class="row"><span>Next flight</span><b>Not blocked · defect on the DDL</b></div>
                   <div class="sign ok">Closed. Corrections only by Amendment.</div>
+                </div>
+                <div class="pane" data-pane>
+                  <div class="defect">
+                    <div class="defect__top"><b class="mono">ATA 32-41</b><span class="pill pill--ok">Rectified</span></div>
+                    <div class="row"><span>Action taken</span><b>LH MLG brake assembly replaced</b></div>
+                    <div class="row"><span>Certified by</span><b>D. Jovanović · Part-66 B1</b></div>
+                    <div class="row"><span>Licence no.</span><b class="mono">RS.66.0412</b></div>
+                    <div class="row"><span>Signature · company stamp</span><b class="ok">Applied 27 OCT 10:14Z</b></div>
+                  </div>
+                  <div class="sign ok">Certificate of Release to Service signed. Removed from the DDL.</div>
                 </div>
               </div>
             </div>
@@ -681,10 +671,11 @@
     </section>
 
     <!-- ============ HASH CHAIN ============ -->
-    <section class="chain" data-chain>
+    <section class="chain" id="integrity" data-chain>
       <div class="wrap">
         <h2 class="h2">Signed means sealed.</h2>
-        <p class="lede">Each signature stores a snapshot of the signer's own drawn signature, the time, and a hash of the record content, linked to the previous one. Change a signed value and the chain shows it.</p>
+        <p class="lede">Each signature stores a snapshot of the signer's own drawn signature, the time, and a hash of the record content, linked to the previous one. Change a signed value and the chain shows it; the only way to correct it is an Amendment linked to the original, which stays visible.</p>
+        <span class="demo-note demo-note--inline chain__demo">Demo data</span>
       </div>
       <div class="chain__track" data-chain-track>
         <div class="block" data-block>
@@ -716,7 +707,6 @@
         </div>
       </div>
       <div class="wrap chain__actions">
-        <span class="demo-note demo-note--inline">Demo data</span>
         <button class="btn btn--ghost" data-tamper>Edit a signed value</button>
         <button class="btn btn--ghost" data-amend hidden>Correct it by Amendment</button>
         <p class="chain__note" data-chain-note aria-live="polite">Fuel at cut-off: <b class="mono">4 020 lb</b></p>
@@ -727,8 +717,8 @@
     <section class="offline" data-offline>
       <div class="wrap offline__grid">
         <div>
-          <h2 class="h2">No signal at FL410. No problem.</h2>
-          <p class="lede">Every entry is written to the device's own database first, on iPad and in the browser alike. The outbox syncs when a network appears. A signed record is never rejected at sync, even if it arrives late.</p>
+          <h2 class="h2">No signal at FL370. No problem.</h2>
+          <p class="lede">Every entry is written to the device's own database first, on iPad and in the browser alike. The outbox syncs when a network appears. A signed record is never rejected at sync, even if it arrives late. A device clock more than 60 seconds off the server is flagged on the record.</p>
           <label class="switch">
             <input type="checkbox" data-net checked>
             <span class="switch__track"><span class="switch__knob"></span></span>
@@ -754,8 +744,6 @@
         <li><b>Open defect, not deferred?</b><span>Preflight cannot be signed until it is rectified by maintenance or deferred against a library MEL/CDL item.</span></li>
         <li><b>MEL deadline expired?</b><span>The ATL is hard-blocked for everyone except maintenance staff. No "continue anyway".</span></li>
         <li><b>First flight of the UTC day?</b><span>Tyre pressures are required. Later flights that day carry them over, marked as carried.</span></li>
-        <li><b>Device clock drifting?</b><span>Offsets over 60 seconds against the server are flagged on the record and in the admin panel.</span></li>
-        <li><b>Signed by mistake?</b><span>Signed records never change. Corrections go through an Amendment linked to the original, which stays visible.</span></li>
       </ul>
     </section>
 
@@ -784,18 +772,15 @@
         <div class="wrap screens__head">
           <h2 class="h2">Built for a cockpit, used on the ramp.</h2>
           <p class="lede">iPad in landscape for the crew and engineers, the same app in the browser, and a web panel for CAMO and administrators.</p>
+          <span class="demo-note demo-note--inline">Demo data · crew names are fictional</span>
         </div>
         <div class="screens__rail" data-rail>
-          <!-- iPad captures (2160×1620 originals in "assets/iPad screens/", resized to 1440×1080 here) -->
-          <figure class="shot"><div class="shot__frame"><img src="assets/screens/01-sign-in.png" alt="eATL sign-in on iPad, with offline unlock by PIN" loading="lazy" data-slot></div><figcaption>Sign in, or unlock offline with PIN</figcaption></figure>
-          <figure class="shot"><div class="shot__frame"><img src="assets/screens/02-fleet.jpg" alt="Fleet overview: choose the aircraft you are flying" loading="lazy" data-slot></div><figcaption>Fleet overview</figcaption></figure>
-          <figure class="shot"><div class="shot__frame"><img src="assets/screens/03-records.png" alt="Technical log of one aircraft with its ATL records and statuses" loading="lazy" data-slot></div><figcaption>Records per aircraft</figcaption></figure>
-          <figure class="shot"><div class="shot__frame"><img src="assets/screens/04-preflight.png" alt="Preflight: defects carried over, oil and fuel uplift, tire pressure" loading="lazy" data-slot></div><figcaption>Preflight: oil, fuel, tire pressure</figcaption></figure>
-          <figure class="shot"><div class="shot__frame"><img src="assets/screens/05-flight-data.jpg" alt="Flight and Flight Data: passengers, crew, block and flight times" loading="lazy" data-slot></div><figcaption>Flight &amp; Flight Data</figcaption></figure>
-          <figure class="shot"><div class="shot__frame"><img src="assets/screens/06-engine.png" alt="Engine parameters: ambient values and per-engine readings" loading="lazy" data-slot></div><figcaption>Engine parameters</figcaption></figure>
-          <figure class="shot"><div class="shot__frame"><img src="assets/screens/07-all-weather.jpg" alt="All Weather Operations section with validation" loading="lazy" data-slot></div><figcaption>All Weather Operations</figcaption></figure>
-          <figure class="shot"><div class="shot__frame"><img src="assets/screens/08-review.png" alt="Review: section status, signatures and the hash chain" loading="lazy" data-slot></div><figcaption>Review and signatures</figcaption></figure>
-          <figure class="shot"><div class="shot__frame"><img src="assets/screens/09-paper-form.jpg" alt="Entry typed in from the paper backup form" loading="lazy" data-slot></div><figcaption>Paper backup form</figcaption></figure>
+          <!-- iPad captures (2160×1620 originals in "assets/iPad screens/", resized to 1440×1080 here); 01, 05, 06, 07 kept on disk, off the rail until re-captured filled in -->
+          <figure class="shot"><div class="shot__frame"><picture><source type="image/webp" srcset="assets/screens/02-fleet-960.webp 960w, assets/screens/02-fleet-1440.webp 1440w" sizes="(max-width: 860px) 84vw, 680px"><img src="assets/screens/02-fleet.jpg" width="1440" height="1080" alt="Fleet overview: choose the aircraft you are flying" loading="lazy" data-slot></picture></div><figcaption>Fleet overview</figcaption></figure>
+          <figure class="shot"><div class="shot__frame"><picture><source type="image/webp" srcset="assets/screens/03-records-960.webp 960w, assets/screens/03-records-1440.webp 1440w" sizes="(max-width: 860px) 84vw, 680px"><img src="assets/screens/03-records.png" width="1440" height="1080" alt="Technical log of one aircraft with its ATL records and statuses" loading="lazy" data-slot></picture></div><figcaption>Records per aircraft</figcaption></figure>
+          <figure class="shot"><div class="shot__frame"><picture><source type="image/webp" srcset="assets/screens/04-preflight-960.webp 960w, assets/screens/04-preflight-1440.webp 1440w" sizes="(max-width: 860px) 84vw, 680px"><img src="assets/screens/04-preflight.png" width="1440" height="1080" alt="Preflight: defects carried over, oil and fuel uplift, tyre pressure" loading="lazy" data-slot></picture></div><figcaption>Preflight: oil, fuel, tyre pressure</figcaption></figure>
+          <figure class="shot"><div class="shot__frame"><picture><source type="image/webp" srcset="assets/screens/08-review-960.webp 960w, assets/screens/08-review-1440.webp 1440w" sizes="(max-width: 860px) 84vw, 680px"><img src="assets/screens/08-review.png" width="1440" height="1080" alt="Review: section status, signatures and the hash chain" loading="lazy" data-slot></picture></div><figcaption>Review and signatures</figcaption></figure>
+          <figure class="shot"><div class="shot__frame"><picture><source type="image/webp" srcset="assets/screens/09-paper-form-960.webp 960w, assets/screens/09-paper-form-1440.webp 1440w" sizes="(max-width: 860px) 84vw, 680px"><img src="assets/screens/09-paper-form.jpg" width="1440" height="1080" alt="Entry typed in from the paper backup form" loading="lazy" data-slot></picture></div><figcaption>Paper backup form</figcaption></figure>
         </div>
       </div>
     </section>
@@ -804,23 +789,23 @@
     <section class="roles" id="roles">
       <div class="wrap">
         <h2 class="h2">Everyone signs only what they own.</h2>
-        <div class="table-wrap">
+        <div class="table-wrap" role="region" aria-label="Roles and permissions" tabindex="0">
           <table class="matrix">
             <thead>
               <tr><th scope="col"></th><th scope="col">Commander</th><th scope="col">Maintenance staff</th><th scope="col">CAMO staff</th><th scope="col">Administrator</th></tr>
             </thead>
             <tbody>
-              <tr><th scope="row">Preflight</th><td class="y">Fill &amp; sign</td><td class="y">Fill &amp; sign</td><td>Read</td><td class="y">Full</td></tr>
-              <tr><th scope="row">Flight log</th><td class="y">Fill &amp; sign</td><td>Read</td><td>Read</td><td class="y">Full</td></tr>
+              <tr><th scope="row">Preflight</th><td class="y">Fill &amp; sign</td><td class="y">Fill &amp; sign</td><td>Read</td><td class="y">Edit, no signature</td></tr>
+              <tr><th scope="row">Flight log</th><td class="y">Fill &amp; sign</td><td>Read</td><td>Read</td><td class="y">Edit, no signature</td></tr>
               <tr><th scope="row">Rectify, close, CRS</th><td>—</td><td class="y">Part-66, signature, stamp</td><td>—</td><td>—</td></tr>
               <tr><th scope="row">MEL/CDL deferral</th><td class="y">From library</td><td class="y">From library</td><td>—</td><td>—</td></tr>
-              <tr><th scope="row">Next maintenance, extensions</th><td>—</td><td>—</td><td class="y">Web panel</td><td class="y">Full</td></tr>
+              <tr><th scope="row">Next maintenance, extensions</th><td>—</td><td>—</td><td class="y">Web panel</td><td class="y">Edit</td></tr>
               <tr><th scope="row">MEL/CDL library</th><td>—</td><td>—</td><td class="y">Maintain</td><td class="y">Maintain</td></tr>
               <tr><th scope="row">Void / Amendment</th><td class="y">Own records</td><td>—</td><td class="y">Yes</td><td class="y">Yes</td></tr>
             </tbody>
           </table>
         </div>
-        <p class="footnote">SIC is named on every flight and can read the record, but fills and signs nothing.</p>
+        <p class="footnote"><abbr title="Second in command">SIC</abbr> is named on every flight and can read the record, but fills and signs nothing. The Administrator can enter and correct any data, but never signs a record.</p>
       </div>
     </section>
 
@@ -829,12 +814,10 @@
       <div class="wrap platform__grid">
         <h2 class="h2">One system, every desk it touches.</h2>
         <dl class="platform__list">
-          <div><dt>iPad app</dt><dd>Landscape-first, fully offline, QR camera, signatures drawn with finger or Pencil.</dd></div>
-          <div><dt>Browser client</dt><dd>The same app as an installable web app, with the same offline database and sync.</dd></div>
-          <div><dt>Web admin</dt><dd>Fleet, per-aircraft field configuration, MEL/CDL library, next maintenance, override monitor.</dd></div>
+          <div><dt>iPad and browser</dt><dd>Landscape-first on iPad and installable in the browser, both fully offline on the same database and sync. QR camera, signatures drawn with finger or Pencil.</dd></div>
+          <div><dt>Web admin</dt><dd>Fleet, per-aircraft field configuration, MEL/CDL library, next maintenance and override monitor, with headers, logos and CAMO approval numbers per operating entity.</dd></div>
           <div><dt>PDF to CAMO</dt><dd>Every closed record is rendered to PDF, archived on the server and e-mailed to CAMO.</dd></div>
           <div><dt>Excel reports</dt><dd>Oil and fuel consumption, tyre pressure trends and defect reporting, all exportable.</dd></div>
-          <div><dt>Multi-operator</dt><dd>Each operator is its own tenant, with headers, logos and CAMO approval numbers per operating entity.</dd></div>
         </dl>
       </div>
     </section>
@@ -845,22 +828,33 @@
       <div class="wrap cta__inner">
         <h2 class="cta__title">Bring your tech log on board.</h2>
         <p class="lede">Tell us about your fleet and how your crews log flights today. We'll walk you through eATL on your own aircraft types.</p>
-        <a class="btn btn--primary btn--lg" href="#" data-mail data-mail-show>Write to us</a>
+        <a class="btn btn--primary btn--lg" href="#" data-mail data-mail-show>Talk to us</a>
         <p class="cta__addr mono" data-mail-text></p>
+        <div class="cta__next">
+          <h3>What happens next</h3>
+          <ol>
+            <li>You write: your fleet, your types, and how the tech log is kept today.</li>
+            <li>We reply by e-mail and set up a walkthrough on your own aircraft types.</li>
+            <li>We map your paper ATL, MEL/CDL and tyre limits onto the per-aircraft configuration.</li>
+          </ol>
+          <p class="cta__reg">eATL holds no authority approval of its own. Acceptance of an electronic tech log is part of each operator's approval with its competent authority.</p>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="foot">
     <div class="wrap foot__inner">
-      <span class="foot__brand"><img src="assets/app-mark.png" alt="" width="24" height="24"> eATL · Electronic Aircraft Technical Log</span>
-      <span>by NextBridge IT</span>
+      <span class="foot__brand"><img src="assets/app-mark-68.png" alt="" width="24" height="24"> eATL · Electronic Aircraft Technical Log</span>
+      <span class="foot__brand">by <img class="foot__nbit" src="assets/nbit-mark.png" alt="" width="34" height="17"> NextBridge IT</span>
+      <small class="foot__copy">© 2026 NextBridge IT. All rights reserved.</small>
     </div>
   </footer>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+  <!-- GSAP 3.12.5, ScrollTrigger 3.12.5, Lenis 1.1.13, served from the site itself -->
+  <script src="js/vendor/gsap.min.js"></script>
+  <script src="js/vendor/ScrollTrigger.min.js"></script>
+  <script src="js/vendor/lenis.min.js"></script>
   <script src="js/site.js"></script>
 </body>
 </html>

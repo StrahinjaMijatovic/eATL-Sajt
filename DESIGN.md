@@ -23,6 +23,11 @@ colors:
   ok-paper: "#1f7a4d"
   warn: "#e3a33a"
   bad: "#e5533d"
+  ok-ink: "#19663f"
+  warn-ink: "#84550a"
+  bad-ink: "#a72f1c"
+  on-brand: "#eef4fb"
+  on-brand-2: "#cfe0f5"
 typography:
   display:
     fontFamily: "Archivo, Helvetica Neue, Arial, sans-serif"
@@ -59,7 +64,7 @@ typography:
     lineHeight: 1.6
   body:
     fontFamily: "Geist, Helvetica Neue, Arial, sans-serif"
-    fontSize: "17px"
+    fontSize: "1.0625rem"
     fontWeight: 400
     lineHeight: 1.6
   label:
@@ -193,6 +198,8 @@ A cold, low-chroma navy family, one cobalt brand blue with a lit counterpart, wa
 
 ### Semantic
 - **Signed Green** (ok, with ok-paper on light surfaces), **Deferral Amber** (warn), **Broken Red** (bad): valid/signed/sent, pending/offline/deferred, broken/rejected. Used as dots, small fills, borders and hash text, never as decoration.
+- **Status ink on paper** (ok-ink, warn-ink, bad-ink): the text colour of pills and notices on light surfaces, each at 4.5:1 or better on its own tinted fill.
+- **On brand** (on-brand, on-brand-2): prose and secondary marks on the closing cobalt field.
 
 ### Named Rules
 **The Ground Marking Rule.** Taxi-line yellow appears only as painted ground (lead-in line, stop bar, stand number). It is never a UI accent, button or highlight.
@@ -215,7 +222,7 @@ A cold, low-chroma navy family, one cobalt brand blue with a lit counterpart, wa
 - **Statement** (700, 105%, 1.12): the single scroll-revealed manifesto paragraph, word by word.
 - **Title** (750, 108%): lifecycle step names, scan results, rules-list questions (scaled up to 2.3rem there), matrix headers, platform terms.
 - **Lede** (Geist 400, max 46 to 54ch, Mist): one supporting paragraph under each headline.
-- **Body** (Geist 400, 17px, 1.6).
+- **Body** (Geist 400, 1.0625rem, 1.6), in rem so it follows the reader's browser font size.
 - **Label** (Geist, 0.72rem, Faded Ink): field labels inside the ATL sheet cells.
 - **Data** (JetBrains Mono 500, tabular figures): field values, times, registrations, hashes.
 - **Marker** (JetBrains Mono 700, 0.7rem, uppercase, +0.06em): AUTO / PREV / CARRIED / CALC field markers and status pills (pills at 500 weight, 0.72rem, +0.04em).
@@ -231,7 +238,7 @@ A single scrolling story of full-height scenes. Content sits in a centered conta
 
 Two-column scenes use asymmetric fractional grids: 5/7 (lifecycle, MEL), 4/7 (platform), 1/1 (QR, offline), with fluid gaps of 40 to 100px. The roles matrix and rules list are full-container ledgers with heavy top and bottom rules.
 
-Single breakpoint at 860px: grids collapse to one column, nav links hide (brand and Contact remain), the hero stacks copy over the jet with the sheet below, the ATL grid goes from three to two columns, the chain track turns vertical, and the screens rail becomes a native scroll-snap carousel.
+Single breakpoint at 860px: grids collapse to one column, nav links move into a Menu dropdown (brand, Menu and Talk to us remain), the hero stacks copy over the jet with the sheet below, the ATL grid goes from three to two columns, the chain track turns vertical, and the screens rail becomes a native scroll-snap carousel.
 
 ## Elevation & Depth
 
@@ -255,7 +262,7 @@ Soft, product-grade rounding that grows with object size: 4px field markers, 10p
 
 ### Buttons
 Capsule, confident, paper on night.
-- **Shape:** full capsule (999px), min height 48px; small 40px, large 60px.
+- **Shape:** full capsule (999px), min height 48px; small 40px (44px on phones), large 60px.
 - **Primary:** Log Paper fill with Log Ink text, Geist 600.
 - **Hover / Focus:** fill brightens to pure white and text shifts to cobalt; 0.25s expo-out; 1px press on active; floodlit-cobalt 2px focus ring offset 3px.
 - **Ghost:** transparent with a strong-hairline border and Floodlight White text; hover raises the border to Mist and adds a faint white wash.
@@ -278,13 +285,13 @@ Capsule, confident, paper on night.
 - **Focus:** floodlit cobalt ring on the track.
 
 ### Navigation
-Fixed top bar: app mark plus wide Archivo wordmark left, four Mist links (hover to white), small primary capsule right. Transparent over the hero; once scrolled it becomes 78% Apron Night with a 14px backdrop blur and a hairline bottom border. Below 860px the links hide.
+Fixed top bar: app mark plus wide Archivo wordmark left, four Mist links (hover to white), small primary capsule "Talk to us" right; the same label is used for every contact action on the page. Transparent over the hero; once scrolled it becomes 94% Apron Night with a hairline bottom border (no backdrop blur: over the paper sections it read as a grey slab). Below 860px the links move into a dropdown opened by a ghost "Menu" capsule (aria-expanded, closes on link and Escape).
 
 ### ATL Sheet (signature component)
 The paper record: Log Paper, 18px radius, paper lift, rotated -3 degrees. A head with label and mono record number over a 2px ink rule; a three-column grid of hairline-ruled cells (two on mobile), each a small Faded Ink label over a mono value; a cell flashes pale blue when its leader line lands. The footer carries a drawn signature in pen-blue, a mono PIN/hash stack, and a green seal dot that pops in when signed. In the hero, values travel as paper slips: a slip pops off the part with a short paper-white tick to a ring on the source, then arcs into its cell, which types the value and flashes pale blue as it lands. No long leader lines cross the screen. The hero is one flight told in four pinned chapters, each with its own staging: Preflight (registration and fuel slips on stand, then close-ups: a main wheel with an inflation gauge whose needle reads NLG, LH and RH MLG in turn, and the oil tank sight glass, full on ENG 1, topped up from a quart can on ENG 2), Flight (off blocks and take-off: the shadow separates from the aircraft, the apron gives way to a streaming cloud deck, times stamp into their cells), Engine (cruise readouts slip into the ambient row, then the camera zooms into engine 2, the PW545 cutaway rotates level and comes apart module by module, each module sending its ENG 2 value as a slip) and All Weather (fog, runway 30 with approach lights sliding in, radio altitude counting to minimums). The sheet carries Preflight / Flight / Engine / All Weather tabs and switches page with a top-down clip reveal; a four-step chapter rail sits bottom-left on desktop.
 
 ### Device Frame
-Graphite iPad bezel (34px, 18px screen radius) with an inset 1.5px edge highlight, holding a light app UI: Log Ink title bar, white tab strip with cobalt active underline, ruled rows. Used for the lifecycle demo and the screenshot rail.
+Graphite iPad bezel (34px, 18px screen radius) with an inset 1.5px edge highlight, holding a light app UI: Log Ink title bar, white tab strip with cobalt active underline, ruled rows. Used for the lifecycle demo and the screenshot rail. The lifecycle follows one defect, not the flight the hero already showed: Reported, Deferred (MEL C), Record closed (the defect stays on the DDL), Rectified with a CRS. A rail on the step list fills dot to dot with the scroll; passed dots stay lit. On phones the device drops its 4:3 ratio and is as tall as its content.
 
 ## Do's and Don'ts
 
@@ -295,6 +302,7 @@ Graphite iPad bezel (34px, 18px screen radius) with an inset 1.5px edge highligh
 - **Do** lift and slightly rotate physical objects (paper, placard, aircraft) with the long soft shadows from the Shadow Vocabulary.
 - **Do** label any synthetic record shown on the page as demo data, in small Mist or Faded Ink text beside it.
 - **Do** tell a mechanism with a pinned or scroll-scrubbed scene, settling on the expo-out curve, and give every scene a complete static end state under reduced motion.
+- **Do** move things with transforms. Animating `left`/`top` or blurring many moving layers showed up as layout shift and jank; a long jump in the hero (back to the top, or across more than two stops) lands at once instead of rewinding.
 
 ### Don't:
 - **Don't** use taxi-line yellow for anything that is not ground marking.

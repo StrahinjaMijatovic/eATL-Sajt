@@ -2,8 +2,7 @@
 (() => {
   "use strict";
 
-  // TODO: replace with the confirmed sales/contact address before launch.
-  const CONTACT_EMAIL = "info@nextbridgeit.net";
+  const CONTACT_EMAIL = "contact@nextbridgeit.net";
   const MAIL_SUBJECT = "eATL: introduction";
 
   const $ = (s, root = document) => root.querySelector(s);
@@ -23,7 +22,7 @@
     const fallback = () => {
       const empty = document.createElement("div");
       empty.className = "shot__empty";
-      empty.innerHTML = `<img src="assets/app-mark.png" alt=""><span>Screenshot slot</span><code>${img.getAttribute("src")}</code>`;
+      empty.innerHTML = `<img src="assets/app-mark-68.png" alt=""><span>Screenshot slot</span><code>${img.getAttribute("src")}</code>`;
       empty.setAttribute("role", "img");
       empty.setAttribute("aria-label", `${img.alt} (screenshot coming soon)`);
       img.replaceWith(empty);
@@ -127,8 +126,8 @@
     };
     if (reduced || !window.gsap || key === "override") { render(); return; }
     gsap.timeline()
-      .set(scanline, { opacity: 1, top: 0 })
-      .to(scanline, { top: "100%", duration: 0.9, ease: "power2.inOut" })
+      .set(scanline, { opacity: 1, y: 0 })
+      .to(scanline, { y: () => scanline.parentElement.offsetHeight, duration: 0.9, ease: "power2.inOut" })
       .set(scanline, { opacity: 0 })
       .add(render)
       .from(scanResult.children, { y: 14, opacity: 0, stagger: 0.06, duration: 0.5, ease: "expo.out" });
@@ -230,6 +229,11 @@
 
   /* ---------- nav state ---------- */
   const nav = $("[data-nav]");
+  const menu = $("[data-menu]");
+  const setMenu = (open) => { nav.classList.toggle("is-open", open); menu.setAttribute("aria-expanded", String(open)); };
+  menu.addEventListener("click", () => setMenu(!nav.classList.contains("is-open")));
+  $$(".nav__links a", nav).forEach((a) => a.addEventListener("click", () => setMenu(false)));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && nav.classList.contains("is-open")) { setMenu(false); menu.focus(); } });
   const onScroll = () => nav.classList.toggle("is-scrolled", window.scrollY > 40);
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
@@ -337,16 +341,25 @@
     slips[k] = { el, tick, ring, cell, a: 0, p: 0, pt: $(`[data-pt="${SOURCE[k] || k}"]`, stage) };
   });
 
+  // reads first, writes after: interleaving them forced a layout per slip on every frame
+  let stageW = 0, stageH = 0;
   const drawSlips = () => {
+    const all = Object.values(slips);
+    const live = all.filter((S) => S.a > 0.001 && S.p < 0.999);
+    all.forEach((S) => {
+      if (live.includes(S) || S.hidden) return;
+      S.el.style.opacity = 0; S.tick.style.opacity = 0; S.ring.style.opacity = 0; S.hidden = true;
+    });
+    if (!live.length) return;
     const sr = stage.getBoundingClientRect();
-    ticks.setAttribute("viewBox", `0 0 ${sr.width} ${sr.height}`);
-    Object.values(slips).forEach((S) => {
-      if (S.a <= 0.001 || S.p >= 0.999) {
-        S.el.style.opacity = 0; S.tick.style.opacity = 0; S.ring.style.opacity = 0; return;
-      }
-      const a = S.pt.getBoundingClientRect();
-      const b = S.cell.getBoundingClientRect();
-      const w = S.el.offsetWidth, h = S.el.offsetHeight;
+    const reads = live.map((S) => [S.pt.getBoundingClientRect(), S.cell.getBoundingClientRect(), S.el.offsetWidth, S.el.offsetHeight]);
+    if (sr.width !== stageW || sr.height !== stageH) {
+      stageW = sr.width; stageH = sr.height;
+      ticks.setAttribute("viewBox", `0 0 ${sr.width} ${sr.height}`);
+    }
+    live.forEach((S, i) => {
+      const [a, b, w, h] = reads[i];
+      S.hidden = false;
       const px = a.left + a.width / 2 - sr.left, py = a.top + a.height / 2 - sr.top;
       const rx = Math.min(px + 22, sr.width - w - 12), ry = Math.max(py - 22 - h, 72);
       const tx = b.left - sr.left + 4, ty = b.top - sr.top + b.height / 2 - h / 2;
@@ -454,6 +467,12 @@
         .to(jetSvg, { scale: 1, duration: 1, ease: "power2.out" }, at + 0.4)
         .to(".apron", { opacity: 1, duration: 0.8 }, at + 0.4);
     };
+    // one close-up hands straight over to the next while the aircraft stays out of shot
+    const handOff = (from, to, origin, at, turnOut = 0, turnIn = 0) => {
+      tl.to(from, { autoAlpha: 0, scale: 0.35, rotate: turnOut, duration: 0.6, ease: "power2.in" }, at)
+        .set(jetSvg, { transformOrigin: origin }, at + 0.6)
+        .fromTo(to, { autoAlpha: 0, scale: 0.35, rotate: turnIn }, { autoAlpha: 1, scale: 1, rotate: 0, duration: 1, ease: "power3.out", immediateRender: false }, at + 0.55);
+    };
 
     /* 1 · Preflight: on stand; registration and fuel, then tyres and oil in close-up */
     tl.to("[data-cue]", { autoAlpha: 0, duration: 0.2 }, 0)
@@ -461,7 +480,7 @@
       .to(".apron", { scale: 1.08, duration: 3.2, ease: "none" }, 0);
     if (desk) tl.to("[data-chapters]", { opacity: 1, duration: 0.5 }, 0.6);
     if (desk) {
-      tl.to(jet, { left: "28%", scale: 0.92, rotate: -8, duration: 1 }, 0.1);
+      tl.to(jet, { x: () => stage.offsetWidth * 0.28 - jet.offsetLeft, scale: 0.92, rotate: -8, duration: 1 }, 0.1);
     } else {
       tl.to(jet, { y: () => 110 - jet.offsetTop, scale: 0.55, rotate: -8, duration: 1 }, 0.1);
     }
@@ -497,11 +516,10 @@
     sched.labels.push({ el: $("[data-tyre-pos]", tyre), list: tyreLabels });
     const tTyOut = tyLast + 1.6;
     tl.to(tyPts, { scale: 0, opacity: 0, duration: 0.2 }, tTyOut);
-    closeOut(tyre, tTyOut, 12);
 
     // oil: sight glass on each engine; ENG 1 reads full, ENG 2 takes half a quart
-    const tOil = tTyOut + 1.2;
-    closeIn(oil, "39.7% 67.2%", tOil, 12);
+    const tOil = tTyOut;
+    handOff(tyre, oil, "39.7% 67.2%", tTyOut, 12, 12);
     const level = $("[data-oil-level]", oil);
     // the can pivots on its spout (local origin); driven as an attribute like the needle
     const canEl = $("[data-can]", oil);
@@ -627,10 +645,17 @@
     // close to authored pace; only a long jump (fast scroll across several steps) is squeezed to the cap
     const SPEED = 1.6, MAX_DUR = 5;
     let player = null, target = 0;
+    const stopIndex = (t) => STOPS.findIndex((s) => t <= s + 0.001);
     const playTo = (t) => {
       if (t === target) return;
       target = t;
       if (player) player.kill();
+      const now = tl.time();
+      if ((t === 0 && now > STOPS[0]) || Math.abs(stopIndex(t) - stopIndex(now)) > 2) {
+        player = null;
+        tl.time(t);
+        return;
+      }
       const dur = Math.min(Math.max(Math.abs(t - tl.time()) / SPEED, 0.3), MAX_DUR);
       player = tl.tweenTo(t, { duration: dur, ease: "none" });
     };
@@ -670,21 +695,29 @@
   const tabs = $$("[data-app-tabs] span");
   const panes = $$("[data-pane]");
   const appStatus = $("[data-app-status]");
-  const STATUS = [["Preflight signed", ""], ["Flight in progress", ""], ["Flight completed", ""], ["Flight completed", ""], ["Closed", "pill--ok"]];
+  const STATUS = [["Defect open", "pill--bad"], ["Deferred · MEL C", "pill--warn"], ["Closed", "pill--ok"], ["Rectified · CRS", "pill--ok"]];
   let cur = -1;
   const setStep = (i) => {
     if (i === cur) return;
     const prev = cur;
     cur = i;
-    steps.forEach((s, k) => s.classList.toggle("is-on", k === i));
+    steps.forEach((s, k) => { s.classList.toggle("is-on", k === i); s.classList.toggle("is-done", k < i); });
     tabs.forEach((s, k) => s.classList.toggle("is-on", k === i));
     appStatus.textContent = STATUS[i][0];
     appStatus.className = `pill ${STATUS[i][1]}`;
     panes.forEach((p, k) => {
       if (k === i) {
         p.classList.add("is-on");
-        gsap.fromTo(p, { autoAlpha: 0, y: prev < i ? 24 : -24 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "expo.out" });
-        gsap.fromTo($$(".row, .sign, .defect, .timeline", p), { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, stagger: 0.05, duration: 0.5, ease: "expo.out", delay: 0.08 });
+        const parts = $$(".row, .sign, .defect", p);
+        // scrolling back revisits a step already seen: plain crossfade, no replay of the build-up
+        if (prev > i) {
+          gsap.killTweensOf([p, ...parts]);
+          gsap.set(parts, { autoAlpha: 1, y: 0 });
+          gsap.fromTo(p, { autoAlpha: 0, y: 0 }, { autoAlpha: 1, duration: 0.25 });
+        } else {
+          gsap.fromTo(p, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "expo.out" });
+          gsap.fromTo(parts, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, stagger: 0.05, duration: 0.5, ease: "expo.out", delay: 0.08 });
+        }
       } else if (p.classList.contains("is-on")) {
         p.classList.remove("is-on");
         gsap.to(p, { autoAlpha: 0, duration: 0.25 });
@@ -692,16 +725,39 @@
     });
   };
   setStep(0);
-  const tlFill = $("[data-tl-fill]");
-  gsap.set(tlFill, { scaleX: 0 });
+  const stepList = $("[data-steps]");
+  const holdStepsHeight = () => {
+    stepList.style.minHeight = "";
+    const open = $("li.is-on span", stepList);
+    const cap = parseFloat(getComputedStyle(open).fontSize) * 6;
+    const collapsed = stepList.offsetHeight - open.offsetHeight;
+    const tallest = Math.max(...steps.map((li) => Math.min($("span", li).scrollHeight, cap)));
+    stepList.style.minHeight = `${collapsed + tallest}px`;
+  };
+  holdStepsHeight();
+  window.addEventListener("resize", holdStepsHeight);
+  // the rail runs dot to dot with the scroll and reaches each dot as its step turns on;
+  // dot positions are read live because the open step's text expands and shifts the ones below
+  const rail = $("[data-life-rail]");
+  let railAt = 0;
+  const dotY = (li) => li.offsetTop + parseFloat(getComputedStyle(li, "::before").top) + 4.5;
+  const drawRail = () => {
+    const k = Math.floor(railAt), f = railAt - k;
+    const y0 = dotY(steps[0]);
+    const y = k >= steps.length - 1 ? dotY(steps[steps.length - 1]) : dotY(steps[k]) + (dotY(steps[k + 1]) - dotY(steps[k])) * f;
+    rail.style.top = `${y0}px`;
+    rail.style.height = `${Math.max(y - y0, 0)}px`;
+  };
+  drawRail();
   ScrollTrigger.create({
-    trigger: "[data-life]", start: "top top", end: "+=360%", pin: ".life__pin", scrub: true,
+    trigger: "[data-life]", start: "top top", end: "+=200%", pin: ".life__pin", scrub: true,
+    onToggle: (self) => (self.isActive ? gsap.ticker.add(drawRail) : gsap.ticker.remove(drawRail)),
+    onRefresh: drawRail,
     onUpdate: (self) => {
       const p = self.progress;
-      const i = Math.min(4, Math.floor(p * 5));
-      setStep(i);
-      const local = p * 5 - 2;
-      gsap.set(tlFill, { scaleX: Math.min(Math.max(local, 0), 1) });
+      const n = steps.length;
+      setStep(Math.min(n - 1, Math.floor(p * n)));
+      railAt = Math.min(p * n, n - 1);
     }
   });
   gsap.from(".ipad", {
@@ -757,6 +813,33 @@
     });
   });
 
+  /* ---------- roles: one card per role for phones, built from the matrix so the two never drift ---------- */
+  const matrix = $(".matrix");
+  if (matrix) {
+    const roles = $$("thead th", matrix).slice(1).map((th) => th.textContent.trim());
+    const rows = $$("tbody tr", matrix).map((tr) => [$("th", tr).textContent.trim(), $$("td", tr).map((td) => td.textContent.trim())]);
+    const cards = document.createElement("ul");
+    cards.className = "role-cards";
+    roles.forEach((role, r) => {
+      const li = document.createElement("li");
+      li.className = "role-card";
+      const h = document.createElement("h3");
+      h.textContent = role;
+      const dl = document.createElement("dl");
+      rows.filter(([, cells]) => cells[r] !== "—").forEach(([task, cells]) => {
+        const div = document.createElement("div");
+        const dt = document.createElement("dt"), dd = document.createElement("dd");
+        dt.textContent = task;
+        dd.textContent = cells[r];
+        div.append(dt, dd);
+        dl.appendChild(div);
+      });
+      li.append(h, dl);
+      cards.appendChild(li);
+    });
+    $(".table-wrap", $("#roles")).after(cards);
+  }
+
   /* ---------- roles rows ---------- */
   gsap.from(".matrix tbody tr", {
     y: 18, autoAlpha: 0, stagger: 0.06, duration: 0.7, ease: "expo.out",
@@ -764,15 +847,19 @@
   });
 
   /* ---------- CTA: take-off ---------- */
-  gsap.fromTo("[data-cta-jet]",
-    { xPercent: 70, yPercent: 90, rotate: -40, scale: 0.7 },
-    { xPercent: 0, yPercent: 0, rotate: -32, scale: 1, ease: "none",
-      scrollTrigger: { trigger: "[data-cta]", start: "top bottom", end: "bottom bottom", scrub: 0.8 } });
+  mm.add({ desk: "(min-width: 861px)", mob: "(max-width: 860px)" }, (ctx) => {
+    const { desk } = ctx.conditions;
+    gsap.fromTo("[data-cta-jet]",
+      { xPercent: desk ? 70 : 120, yPercent: desk ? 90 : 20, rotate: -40, scale: 0.7 },
+      { xPercent: 0, yPercent: 0, rotate: -32, scale: 1, ease: "none",
+        scrollTrigger: { trigger: "[data-cta]", start: "top bottom", end: desk ? "bottom bottom" : "top 20%", scrub: 0.8 } });
+  });
   gsap.from(".cta__title", {
     yPercent: 30, autoAlpha: 0, ease: "expo.out", duration: 1.1,
     scrollTrigger: { trigger: "[data-cta]", start: "top 65%", once: true }
   });
 
-  window.addEventListener("load", () => ScrollTrigger.refresh());
-  if (document.fonts) document.fonts.ready.then(() => ScrollTrigger.refresh());
+  // one refresh once both images and fonts are in, instead of two that each moved the pin spacers
+  const loaded = new Promise((res) => (document.readyState === "complete" ? res() : window.addEventListener("load", res, { once: true })));
+  Promise.all([loaded, document.fonts ? document.fonts.ready : null]).then(() => ScrollTrigger.refresh());
 })();
