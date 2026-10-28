@@ -238,16 +238,43 @@
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 
+  /* ---------- tyre gauge dial, 0 to 250 psi over 270 degrees ---------- */
+  const tyre = $("[data-tyre]");
+  const DIAL = { cx: 470, cy: 180, from: -135, sweep: 270, max: 250 };
+  const needleAngle = (psi) => DIAL.from + (psi / DIAL.max) * DIAL.sweep;
+  const needleEl = $("[data-needle]", tyre);
+  const setNeedle = (deg) => needleEl.setAttribute("transform", `rotate(${deg.toFixed(2)} ${DIAL.cx} ${DIAL.cy})`);
+  const dialTicks = $("[data-gauge-ticks]", tyre);
+  for (let v = 0; v <= DIAL.max; v += 10) {
+    const a = (needleAngle(v) - 90) * Math.PI / 180;
+    const major = v % 50 === 0;
+    const r1 = 84, r2 = major ? 68 : 75;
+    const t = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    t.setAttribute("x1", DIAL.cx + r1 * Math.cos(a)); t.setAttribute("y1", DIAL.cy + r1 * Math.sin(a));
+    t.setAttribute("x2", DIAL.cx + r2 * Math.cos(a)); t.setAttribute("y2", DIAL.cy + r2 * Math.sin(a));
+    t.setAttribute("class", major ? "ty-tick ty-tick--major" : "ty-tick");
+    dialTicks.appendChild(t);
+    if (major) {
+      const n = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      n.setAttribute("x", DIAL.cx + 54 * Math.cos(a)); n.setAttribute("y", DIAL.cy + 54 * Math.sin(a) + 5);
+      n.setAttribute("text-anchor", "middle"); n.setAttribute("class", "ty-num");
+      n.textContent = v;
+      dialTicks.appendChild(n);
+    }
+  }
+  setNeedle(needleAngle(165));
+
   /* ---------- static end-states (no GSAP or reduced motion) ---------- */
   const endStates = () => {
     typed.forEach((t) => setTyped(t, 1));
-    const st = $("[data-status]");
-    if (st) { st.textContent = "Preflight signed"; st.className = "pill pill--ok"; }
+    $$("[data-status][data-end]").forEach((st) => { st.textContent = st.dataset.end; st.className = `pill ${st.dataset.endCls}`; });
+    $$("[data-count]").forEach((el) => (el.textContent = el.dataset.count.replace("-", "−")));
     $$("[data-words] .w").forEach((w) => (w.style.opacity = 1));
     $$("[data-rules] li").forEach((li) => li.classList.add("is-on"));
     $$("[data-cal] .fill").forEach((f) => (f.style.transform = "scaleX(1)"));
-    const dot = $(".sheet__dot");
-    if (dot) dot.style.transform = "scale(1)";
+    $$(".sheet__dot").forEach((dot) => (dot.style.transform = "scale(1)"));
+    const fltLabel = $("[data-flt-label]");
+    if (fltLabel) { fltLabel.textContent = "Block ON"; $("[data-flt-time]").textContent = "07:50Z"; }
     if (net) setNet();
   };
 
@@ -274,114 +301,9 @@
     });
   }
 
-  /* ---------- hero: one flight in four chapters, the aircraft fills its own log ---------- */
-  const hero = $("[data-hero]");
-  const stage = $(".hero__stage", hero);
-  const sheet = $("[data-sheet]");
-  const jet = $("[data-jet]");
-  const jetSvg = $("svg", jet);
-  const ticks = $("[data-ticks]");
-  const sig = $("[data-sig]");
-  const statusPill = $("[data-status]");
-  const pages = $$("[data-page]", sheet);
-  const sheetTabs = $$("[data-tab]", sheet);
-  const chapterEls = $$("[data-chapters] li");
-  const engine = $("[data-engine]");
-  const tyre = $("[data-tyre]");
-  const oil = $("[data-oil]");
-  const runway = $("[data-runway]");
-  const ex = (k) => $(`[data-ex="${k}"]`, engine);
-  const stampCell = (k) => $(`[data-stamp="${k}"]`, sheet);
+  const mm = gsap.matchMedia();
 
-  /* tyre gauge dial, 0 to 250 psi over 270 degrees */
-  const DIAL = { cx: 470, cy: 180, from: -135, sweep: 270, max: 250 };
-  const needleAngle = (psi) => DIAL.from + (psi / DIAL.max) * DIAL.sweep;
-  const dialTicks = $("[data-gauge-ticks]", tyre);
-  for (let v = 0; v <= DIAL.max; v += 10) {
-    const a = (needleAngle(v) - 90) * Math.PI / 180;
-    const major = v % 50 === 0;
-    const r1 = 84, r2 = major ? 68 : 75;
-    const t = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    t.setAttribute("x1", DIAL.cx + r1 * Math.cos(a)); t.setAttribute("y1", DIAL.cy + r1 * Math.sin(a));
-    t.setAttribute("x2", DIAL.cx + r2 * Math.cos(a)); t.setAttribute("y2", DIAL.cy + r2 * Math.sin(a));
-    t.setAttribute("class", major ? "ty-tick ty-tick--major" : "ty-tick");
-    dialTicks.appendChild(t);
-    if (major) {
-      const n = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      n.setAttribute("x", DIAL.cx + 54 * Math.cos(a)); n.setAttribute("y", DIAL.cy + 54 * Math.sin(a) + 5);
-      n.setAttribute("text-anchor", "middle"); n.setAttribute("class", "ty-num");
-      n.textContent = v;
-      dialTicks.appendChild(n);
-    }
-  }
-
-  /* value slips: each value lifts off its part and flies into its cell */
-  const PRE = ["reg", "fuel", "nlg", "lmlg", "rmlg", "eng1", "eng2"];
-  const AMB = ["h-fl", "h-tat", "h-oat", "h-mach"];
-  const ENG = ["x-n1", "x-n2", "x-ff", "x-itt", "x-ot", "x-op"];
-  const AWO = ["a-ra", "a-rwy"];
-  const SOURCE = { nlg: "tyre", lmlg: "tyre", rmlg: "tyre", eng1: "oil", eng2: "oil" };
-  const svgEl = (n) => document.createElementNS("http://www.w3.org/2000/svg", n);
-  const slips = {};
-  [...PRE, ...AMB, ...ENG, ...AWO].forEach((k) => {
-    const cell = $(`[data-field="${k}"]`, sheet);
-    const row = cell.parentElement.classList.contains("sheet__grid--eng") ? cell.previousElementSibling.previousElementSibling : null;
-    const label = row ? `ENG 2 · ${row.textContent.trim()}` : $("span", cell).textContent.trim();
-    const value = $$("[data-type]", cell).map((el) => el.dataset.type || el.textContent).join(" ");
-    const el = document.createElement("div");
-    el.className = "slip";
-    el.setAttribute("aria-hidden", "true");
-    el.innerHTML = `<small></small><b></b>`;
-    el.firstChild.textContent = label;
-    el.lastChild.textContent = value;
-    stage.appendChild(el);
-    const tick = svgEl("path"), ring = svgEl("circle");
-    ring.setAttribute("r", 7);
-    ticks.append(tick, ring);
-    slips[k] = { el, tick, ring, cell, a: 0, p: 0, pt: $(`[data-pt="${SOURCE[k] || k}"]`, stage) };
-  });
-
-  // reads first, writes after: interleaving them forced a layout per slip on every frame
-  let stageW = 0, stageH = 0;
-  const drawSlips = () => {
-    const all = Object.values(slips);
-    const live = all.filter((S) => S.a > 0.001 && S.p < 0.999);
-    all.forEach((S) => {
-      if (live.includes(S) || S.hidden) return;
-      S.el.style.opacity = 0; S.tick.style.opacity = 0; S.ring.style.opacity = 0; S.hidden = true;
-    });
-    if (!live.length) return;
-    const sr = stage.getBoundingClientRect();
-    const reads = live.map((S) => [S.pt.getBoundingClientRect(), S.cell.getBoundingClientRect(), S.el.offsetWidth, S.el.offsetHeight]);
-    if (sr.width !== stageW || sr.height !== stageH) {
-      stageW = sr.width; stageH = sr.height;
-      ticks.setAttribute("viewBox", `0 0 ${sr.width} ${sr.height}`);
-    }
-    live.forEach((S, i) => {
-      const [a, b, w, h] = reads[i];
-      S.hidden = false;
-      const px = a.left + a.width / 2 - sr.left, py = a.top + a.height / 2 - sr.top;
-      const rx = Math.min(px + 22, sr.width - w - 12), ry = Math.max(py - 22 - h, 72);
-      const tx = b.left - sr.left + 4, ty = b.top - sr.top + b.height / 2 - h / 2;
-      const k = S.p;
-      const x = rx + (tx - rx) * k;
-      const y = ry + (ty - ry) * k - Math.sin(Math.PI * k) * 70;
-      const s = (0.6 + 0.4 * S.a) * (1 - 0.18 * k);
-      S.el.style.transform = `translate(${x}px, ${y}px) rotate(${(-3 * k).toFixed(2)}deg) scale(${s})`;
-      S.el.style.opacity = Math.min(S.a, (1 - k) / 0.12);
-      const tickOn = S.a * Math.max(0, 1 - k * 5);
-      S.tick.setAttribute("d", `M${px},${py} L${rx},${ry + h}`);
-      S.tick.style.opacity = tickOn;
-      S.ring.setAttribute("cx", px); S.ring.setAttribute("cy", py);
-      S.ring.style.opacity = tickOn;
-    });
-  };
-
-  const sigLen = sig.getTotalLength();
-  gsap.set(sig, { strokeDasharray: sigLen, strokeDashoffset: sigLen });
-  gsap.set(".sheet__dot", { scale: 0 });
-  typed.forEach((t) => { if (sheet.contains(t.el)) setTyped(t, 0); });
-
+  /* ---------- flight: four chapters, each plays on its own as it scrolls into view ---------- */
   const typerTween = (tl, el, at, dur = 0.5) => {
     const item = typed.find((t) => t.el === el);
     if (!item) return;
@@ -393,295 +315,270 @@
     tl.fromTo(cell, { backgroundColor: "rgba(231,240,250,0)" }, { backgroundColor: "rgba(231,240,250,1)", duration: 0.12, immediateRender: false }, at)
       .to(cell, { backgroundColor: "rgba(231,240,250,0)", duration: 0.6 }, at + 0.12);
   };
-  // a slip pops off the part, holds, flies into the cell; the cell types the value as it lands
-  const slip = (tl, k, at) => {
-    const S = slips[k];
-    tl.to(S, { a: 1, duration: 0.3, ease: "back.out(2)" }, at)
-      .to(S, { p: 1, duration: 0.75, ease: "power2.inOut" }, at + 0.5);
-    typeIn(tl, S.cell, at + 1.1, 0.25);
-    flash(tl, S.cell, at + 1.15);
-  };
-  const stamp = (tl, k, at) => { typeIn(tl, stampCell(k), at, 0.3); flash(tl, stampCell(k), at + 0.25); };
+  // a value lands in its cell: typed in, then the cell lights up
+  const fill = (tl, cell, at) => { typeIn(tl, cell, at, 0.3); flash(tl, cell, at + 0.25); };
   const signed = (v) => (v < 0 ? "−" : "+") + Math.abs(Math.round(v));
   const counter = (tl, el, to, fmt, at, dur, ease = "power1.out") => {
-    const from = parseFloat(el.textContent.replace("−", "-"));
-    const o = { v: from };
+    const o = { v: parseFloat(el.textContent.replace("−", "-")) };
     tl.to(o, { v: to, duration: dur, ease, onUpdate: () => (el.textContent = fmt(o.v)) }, at);
   };
+  const setStatus = (tl, pill, text, cls, at) => tl.call(() => { pill.textContent = text; pill.className = `pill ${cls}`; }, null, at);
+  const fullText = (el) => typed.find((t) => t.el === el).full;
+  const thousands = (v) => Math.round(v).toLocaleString("en-US").replace(/,/g, " ");
 
-  /* page, status, chapter and close-up labels follow the timeline position, both directions */
-  const pick = (sched, t) => sched.reduce((v, [at, val]) => (t >= at ? val : v), sched[0][1]);
-  let curPage = 0;
-  const showPage = (i) => {
-    if (i === curPage) return;
-    curPage = i;
-    pages.forEach((p, k) => p.classList.toggle("is-on", k === i));
-    sheetTabs.forEach((s, k) => s.classList.toggle("is-on", k === i));
-    gsap.fromTo(pages[i], { clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0% 0)", duration: 0.55, ease: "expo.out" });
+  /* value slips: a value lifts off the part as a paper slip, tied to it by a tick, and flies into its cell */
+  const svgEl = (n) => document.createElementNS("http://www.w3.org/2000/svg", n);
+  const slipLabel = (cell) => {
+    const row = cell.parentElement.classList.contains("sheet__grid--eng") ? cell.previousElementSibling.previousElementSibling : null;
+    return row ? `ENG 2 · ${row.textContent.trim()}` : $("span", cell).textContent.trim();
   };
-  let curStatus = "";
-  const setStatus = ([text, cls]) => {
-    if (text === curStatus) return;
-    curStatus = text;
-    statusPill.textContent = text;
-    statusPill.className = `pill ${cls}`;
-  };
-
-  const mm = gsap.matchMedia();
-  mm.add({ desk: "(min-width: 861px)", mob: "(max-width: 860px)" }, (ctx) => {
-    const { desk } = ctx.conditions;
-    gsap.set(sheet, { x: 0, y: 0, autoAlpha: 0, xPercent: desk ? 40 : -50, yPercent: desk ? -50 : 30, rotate: desk ? 6 : 4 });
-    gsap.set(jet, { x: 0, y: 0, xPercent: -50, yPercent: desk ? -50 : 0, transformOrigin: desk ? "50% 50%" : "50% 0%" });
-    gsap.set(jetSvg, { scale: 1, transformOrigin: "50% 50%" });
-    gsap.set([engine, tyre, oil], { x: 0, y: 0, xPercent: desk ? 0 : -50, yPercent: desk ? -50 : 0, autoAlpha: 0 });
-    gsap.set(runway, { xPercent: -50, autoAlpha: 0 });
-    gsap.set([".hot circle", ".ex-pt"], { scale: 0, opacity: 0 });
-
-    const sched = { pages: [[0, 0]], status: [[0, ["Draft", "pill--draft"]]], chapters: [], labels: [] };
-    const sync = () => {
-      drawSlips();
-      const t = tl.time();
-      showPage(pick(sched.pages, t));
-      setStatus(pick(sched.status, t));
-      sched.labels.forEach(({ el, list }) => { const v = pick(list, t); if (el.textContent !== v) el.textContent = v; });
-      chapterEls.forEach((li, i) => {
-        const [a, b] = sched.chapters[i] || [0, 0];
-        li.classList.toggle("is-on", t >= a && t < b);
-        li.style.setProperty("--p", Math.min(Math.max((t - a) / (b - a), 0), 1).toFixed(3));
-      });
-    };
-
-    const tl = gsap.timeline({ paused: true, defaults: { ease: "power2.inOut" }, onUpdate: sync });
-
-    // camera dives into a point on the aircraft and hands over to a close-up
-    const closeIn = (overlay, origin, at, turn = 0) => {
-      tl.set(jetSvg, { transformOrigin: origin }, at)
-        .to(jetSvg, { scale: 6, duration: 1, ease: "power2.in" }, at)
-        .to(jet, { autoAlpha: 0, duration: 0.3 }, at + 0.7)
-        .to(".apron", { opacity: 0.35, duration: 0.8 }, at)
-        .fromTo(overlay, { autoAlpha: 0, scale: 0.35, rotate: turn }, { autoAlpha: 1, scale: 1, rotate: 0, duration: 1, ease: "power3.out", immediateRender: false }, at + 0.55);
-    };
-    const closeOut = (overlay, at, turn = 0) => {
-      tl.to(overlay, { autoAlpha: 0, scale: 0.35, rotate: turn, duration: 0.8, ease: "power2.in" }, at)
-        .to(jet, { autoAlpha: 1, duration: 0.3 }, at + 0.4)
-        .to(jetSvg, { scale: 1, duration: 1, ease: "power2.out" }, at + 0.4)
-        .to(".apron", { opacity: 1, duration: 0.8 }, at + 0.4);
-    };
-    // one close-up hands straight over to the next while the aircraft stays out of shot
-    const handOff = (from, to, origin, at, turnOut = 0, turnIn = 0) => {
-      tl.to(from, { autoAlpha: 0, scale: 0.35, rotate: turnOut, duration: 0.6, ease: "power2.in" }, at)
-        .set(jetSvg, { transformOrigin: origin }, at + 0.6)
-        .fromTo(to, { autoAlpha: 0, scale: 0.35, rotate: turnIn }, { autoAlpha: 1, scale: 1, rotate: 0, duration: 1, ease: "power3.out", immediateRender: false }, at + 0.55);
-    };
-
-    /* 1 · Preflight: on stand; registration and fuel, then tyres and oil in close-up */
-    tl.to("[data-cue]", { autoAlpha: 0, duration: 0.2 }, 0)
-      .to("[data-hero-copy]", { y: -120, autoAlpha: 0, filter: "blur(6px)", duration: 0.8 }, 0)
-      .to(".apron", { scale: 1.08, duration: 3.2, ease: "none" }, 0);
-    if (desk) tl.to("[data-chapters]", { opacity: 1, duration: 0.5 }, 0.6);
-    if (desk) {
-      tl.to(jet, { x: () => stage.offsetWidth * 0.28 - jet.offsetLeft, scale: 0.92, rotate: -8, duration: 1 }, 0.1);
-    } else {
-      tl.to(jet, { y: () => 110 - jet.offsetTop, scale: 0.55, rotate: -8, duration: 1 }, 0.1);
-    }
-    tl.to(sheet, { autoAlpha: 1, xPercent: desk ? 0 : -50, yPercent: desk ? -50 : 0, rotate: -3, duration: 0.9, ease: "expo.out" }, 0.55)
-      .to(".hot circle", { scale: 1, opacity: 1, stagger: 0.1, duration: 0.3, ease: "back.out(2)" }, 1);
-    typeIn(tl, $(".sheet__head", sheet), 1.25, 0.5);
-    slip(tl, "reg", 1.5);
-    slip(tl, "fuel", 2.0);
-    $$(".cell", pages[0]).filter((c) => !c.dataset.field).forEach((c, i) => typeIn(tl, c, 1.7 + i * 0.22, 0.3));
-    tl.to(".hot circle", { scale: 0, opacity: 0, duration: 0.3 }, 3.3);
-
-    // tyres: gauge on the valve, NLG then both mains; the needle drops to zero between wheels
-    const tTy = 3.4;
-    closeIn(tyre, "39.7% 53.1%", tTy, -12);
-    // the needle turns about the dial centre; driven as an attribute so the pivot never drifts
-    const needleEl = $("[data-needle]", tyre);
-    const needle = { deg: needleAngle(0) };
-    const setNeedle = () => needleEl.setAttribute("transform", `rotate(${needle.deg.toFixed(2)} ${DIAL.cx} ${DIAL.cy})`);
-    setNeedle();
-    const tyPts = $$("[data-pt='tyre']", tyre);
-    tl.to(tyPts, { scale: 1, opacity: 1, duration: 0.3 }, tTy + 1.3);
-    // both mains read the same pressure, so they share one reading and lift off one after the other
-    const READS = [[["nlg"], "TYRE · NLG", 120], [["lmlg", "rmlg"], "TYRE · LH / RH MLG", 165]];
-    const tyreLabels = [];
-    let tyLast = 0;
-    READS.forEach(([keys, label, psi], i) => {
-      const at = tTy + 1.4 + i * 1.6;
-      tyreLabels.push([i === 0 ? 0 : at - 0.15, label]);
-      if (i > 0) tl.to(needle, { deg: needleAngle(0), duration: 0.3, ease: "power2.in", onUpdate: setNeedle }, at - 0.45);
-      tl.to(needle, { deg: needleAngle(psi), duration: 0.6, ease: "back.out(1.4)", onUpdate: setNeedle }, at);
-      keys.forEach((k, j) => slip(tl, k, (tyLast = at + 0.55 + j * 0.5)));
-    });
-    sched.labels.push({ el: $("[data-tyre-pos]", tyre), list: tyreLabels });
-    const tTyOut = tyLast + 1.6;
-    tl.to(tyPts, { scale: 0, opacity: 0, duration: 0.2 }, tTyOut);
-
-    // oil: sight glass on each engine; ENG 1 reads full, ENG 2 takes half a quart
-    const tOil = tTyOut;
-    handOff(tyre, oil, "39.7% 67.2%", tTyOut, 12, 12);
-    const level = $("[data-oil-level]", oil);
-    // the can pivots on its spout (local origin); driven as an attribute like the needle
-    const canEl = $("[data-can]", oil);
-    const can = { x: 520, y: 120, r: 0 };
-    const setCan = () => canEl.setAttribute("transform", `translate(${can.x.toFixed(1)} ${can.y.toFixed(1)}) rotate(${can.r.toFixed(1)})`);
-    const stream = $("[data-oil-stream]", oil);
-    const oilPt = $("[data-pt='oil']", oil);
-    tl.to(oilPt, { scale: 1, opacity: 1, duration: 0.3 }, tOil + 1.3);
-    slip(tl, "eng1", tOil + 1.4);
-    const tE2 = tOil + 2.3;
-    sched.labels.push({ el: $("[data-oil-pos]", oil), list: [[0, "ENG 1 · OIL"], [tE2, "ENG 2 · OIL"]] });
-    tl.to(level, { attr: { y: 178, height: 144 }, duration: 0.35 }, tE2)
-      .to(can, { x: 332, y: 2, r: -105, duration: 0.65, ease: "power2.inOut", onUpdate: setCan }, tE2 + 0.3)
-      .to(stream, { opacity: 1, duration: 0.15 }, tE2 + 0.9)
-      .to(level, { attr: { y: 150, height: 172 }, duration: 0.75, ease: "power1.inOut" }, tE2 + 1.0)
-      .to(stream, { opacity: 0, duration: 0.15 }, tE2 + 1.75)
-      .to(can, { x: 520, y: 120, r: 0, duration: 0.6, ease: "power2.inOut", onUpdate: setCan }, tE2 + 1.85);
-    slip(tl, "eng2", tE2 + 1.9);
-    const tOilOut = tE2 + 3.35;
-    tl.to(oilPt, { scale: 0, opacity: 0, duration: 0.2 }, tOilOut);
-    closeOut(oil, tOilOut, -12);
-
-    const tSign = tOilOut + 1.2;
-    tl.to(sig, { strokeDashoffset: 0, duration: 0.8, ease: "power1.inOut" }, tSign);
-    typeIn(tl, $(".sheet__hash", sheet), tSign + 0.6, 0.4);
-    tl.to(".sheet__dot", { scale: 1, duration: 0.3, ease: "back.out(3)" }, tSign + 0.9);
-    sched.status.push([tSign + 0.95, ["Preflight signed", "pill--ok"]]);
-
-    /* 2 · Flight: crew and route, off blocks, take-off */
-    const T2 = tSign + 1.6;
-    sched.pages.push([T2, 1]);
-    $$(".cell:not([data-stamp])", pages[1]).forEach((c, i) => typeIn(tl, c, T2 + 0.2 + i * 0.14, 0.3));
-    const tOff = T2 + 1.3;
-    tl.to(jet, { rotate: 0, y: "-=30", duration: 0.9, ease: "power1.inOut" }, tOff)
-      .to(".apron", { y: 160, duration: 1, ease: "power1.in" }, tOff);
-    stamp(tl, "off", tOff + 0.5);
-    sched.status.push([tOff + 0.5, ["Flight in progress", ""]]);
-
-    const tTo = T2 + 2.4;
-    tl.to(".apron", { autoAlpha: 0, scale: 1.4, duration: 1.1, ease: "power2.in" }, tTo)
-      .to("[data-sky]", { autoAlpha: 1, duration: 0.9 }, tTo + 0.2)
-      .to(jet, { "--sx": "96px", "--sy": "150px", "--sb": "40px", "--so": 0.16, scale: desk ? 1 : 0.6, duration: 1.3 }, tTo + 0.1);
-    stamp(tl, "to", tTo + 0.6);
-    const hud = $("[data-hud]");
-    tl.to(hud, { autoAlpha: 1, duration: 0.4 }, tTo + 0.6);
-    const hv = (k) => $(`[data-pt="${k}"]`, hud);
-    counter(tl, hv("h-fl"), 370, (v) => String(Math.round(v)).padStart(3, "0"), tTo + 0.7, 1.6);
-    counter(tl, hv("h-tat"), -34, signed, tTo + 0.7, 1.6);
-    counter(tl, hv("h-oat"), -55, signed, tTo + 0.7, 1.6);
-    counter(tl, hv("h-mach"), 0.7, (v) => v.toFixed(2), tTo + 0.7, 1.6);
-
-    /* 3 · Engine: cruise readings, then engine 2 taken apart module by module */
-    const T3 = tTo + 2.6;
-    sched.pages.push([T3, 2]);
-    AMB.forEach((k, i) => slip(tl, k, T3 + 0.3 + i * 0.3));
-
-    const tZoom = T3 + 2.1;
-    tl.set(jetSvg, { transformOrigin: "60.3% 67.2%" }, tZoom)
-      .to(hud, { autoAlpha: 0, duration: 0.4 }, tZoom)
-      .to(jetSvg, { scale: 7, duration: 1.1, ease: "power2.in" }, tZoom)
-      .to(jet, { autoAlpha: 0, duration: 0.35 }, tZoom + 0.75)
-      .to("[data-sky]", { opacity: 0.45, duration: 0.8 }, tZoom)
-      .fromTo(engine, { autoAlpha: 0, scale: 0.3, rotate: 90 }, { autoAlpha: 1, scale: 1, rotate: 0, duration: 1.1, ease: "power3.out", immediateRender: false }, tZoom + 0.6);
-
-    const tBoom = tZoom + 1.7;
-    const SPREAD = { "cowl-top": { y: -112, opacity: 0.5 }, "cowl-bot": { y: 112, opacity: 0.5 }, fan: { x: -150 }, comp: { x: -55 }, comb: { x: 18 }, turb: { x: 88 }, exh: { x: 178 }, agb: { y: 44 } };
-    Object.entries(SPREAD).forEach(([k, v], i) => tl.to(ex(k), { ...v, duration: 1, ease: "expo.inOut" }, tBoom + i * 0.04));
-    tl.to(".ex-label", { opacity: 1, stagger: 0.05, duration: 0.4 }, tBoom + 0.8)
-      .to($$(".ex-pt", engine), { scale: 1, opacity: 1, stagger: 0.05, duration: 0.3, ease: "back.out(2)" }, tBoom + 0.9);
-    const tE = tBoom + 1.3;
-    ENG.forEach((k, i) => slip(tl, k, tE + i * 0.3));
-    $$("[data-e1]", sheet).forEach((c, i) => typeIn(tl, c, tE + 1.1 + i * 0.3, 0.3));
-
-    const tBack = tE + ENG.length * 0.3 + 1.3;
-    tl.to([".ex-label", ...$$(".ex-pt", engine)], { opacity: 0, duration: 0.3 }, tBack);
-    Object.keys(SPREAD).forEach((k) => tl.to(ex(k), { x: 0, y: 0, opacity: 1, duration: 0.8, ease: "expo.inOut" }, tBack + 0.2));
-    tl.to(engine, { autoAlpha: 0, scale: 0.3, rotate: 90, duration: 0.9, ease: "power2.in" }, tBack + 1.0)
-      .to(jet, { autoAlpha: 1, duration: 0.35 }, tBack + 1.3)
-      .to(jetSvg, { scale: 1, duration: 1.1, ease: "power2.out" }, tBack + 1.3)
-      .to("[data-sky]", { opacity: 1, duration: 0.8 }, tBack + 1.3);
-
-    /* 4 · All Weather: CAT IIIA approach into fog, touchdown, back on blocks */
-    const T4 = tBack + 2.6;
-    sched.pages.push([T4, 3]);
-    const stageH = () => stage.offsetHeight;
-    const jetCY = () => (desk ? stageH() / 2 - 30 : 80 + jet.offsetHeight * 0.3);
-    const rwyFinal = () => jetCY() - runway.offsetHeight * (1450 / 2400);
-    tl.to("[data-fog]", { autoAlpha: 1, duration: 1 }, T4)
-      .to(".cloud", { opacity: 0, duration: 0.8 }, T4 + 0.2)
-      .to(hud, { autoAlpha: 1, duration: 0.4 }, T4 + 0.2)
-      .to("[data-hud-cruise]", { opacity: 0, duration: 0.3 }, T4 + 0.2)
-      .to("[data-hud-ra]", { opacity: 1, duration: 0.3 }, T4 + 0.35)
-      .fromTo(runway, { y: () => rwyFinal() - stageH() * 1.4 }, { y: rwyFinal, duration: 3.4, ease: "power1.out", immediateRender: false }, T4 + 0.2)
-      .to(runway, { autoAlpha: 1, duration: 0.6 }, T4 + 0.2)
-      .to(jet, { "--sx": "18px", "--sy": "26px", "--sb": "24px", "--so": 0.55, scale: desk ? 0.92 : 0.55, duration: 3.2, ease: "power1.in" }, T4 + 0.4);
-    counter(tl, $("[data-ra]", hud), 50, (v) => `${Math.round(v)} ft`, T4 + 0.4, 2.6, "power1.in");
-    tl.to("[data-dh]", { opacity: 1, duration: 0.15 }, T4 + 3.0);
-    $$(".cell:not([data-field])", pages[3]).forEach((c, i) => typeIn(tl, c, T4 + 0.6 + i * 0.32, 0.3));
-    tl.to("[data-fog]", { autoAlpha: 0.3, duration: 0.8 }, T4 + 2.8);
-    slip(tl, "a-ra", T4 + 3.05);
-    slip(tl, "a-rwy", T4 + 3.5);
-
-    const tLdg = T4 + 5.0;
-    sched.pages.push([tLdg, 1]);
-    stamp(tl, "ldg", tLdg + 0.3);
-    const tIn = tLdg + 0.9;
-    tl.to([runway, "[data-fog]", hud], { autoAlpha: 0, duration: 0.8 }, tIn)
-      .to("[data-sky]", { autoAlpha: 0, duration: 0.8 }, tIn + 0.2)
-      .fromTo(".apron", { y: -160, scale: 1.2 }, { autoAlpha: 1, y: 0, scale: 1.08, duration: 1.1, ease: "power2.out", immediateRender: false }, tIn)
-      .to(jet, { rotate: -8, y: "+=30", duration: 1, ease: "power1.inOut" }, tIn + 0.2);
-    stamp(tl, "on", tIn + 1.0);
-    ["fuel", "bt", "ft", "ld"].forEach((k, i) => stamp(tl, k, tIn + 1.25 + i * 0.2));
-    sched.status.push([tIn + 1.1, ["Flight completed", ""]]);
-    tl.to({}, { duration: 0.8 });
-    // the cloud deck streams past from take-off until the fog takes over
-    tl.fromTo(".cloud", { y: 0 }, { y: () => stage.offsetHeight * 1.8, ease: "none", duration: T4 + 1 - (tTo + 0.2), immediateRender: false }, tTo + 0.2);
-
-    const end = tl.duration();
-    sched.chapters = [[0, T2], [T2, T3], [T3, T4], [T4, end + 1]];
-
-    /* scroll picks the step, the step plays on its own: each stop is a resting frame */
-    const STOPS = [tTy, tTyOut, tOilOut, T3, tBack, tLdg, end];
-    // close to authored pace; only a long jump (fast scroll across several steps) is squeezed to the cap
-    const SPEED = 1.6, MAX_DUR = 5;
-    let player = null, target = 0;
-    const stopIndex = (t) => STOPS.findIndex((s) => t <= s + 0.001);
-    const playTo = (t) => {
-      if (t === target) return;
-      target = t;
-      if (player) player.kill();
-      const now = tl.time();
-      if ((t === 0 && now > STOPS[0]) || Math.abs(stopIndex(t) - stopIndex(now)) > 2) {
-        player = null;
-        tl.time(t);
+  const slipLayer = (body) => {
+    const layer = document.createElement("div");
+    layer.className = "slips";
+    layer.setAttribute("aria-hidden", "true");
+    const ticks = svgEl("svg");
+    layer.appendChild(ticks);
+    body.appendChild(layer);
+    // reads first, writes after: interleaving them forced a layout per slip on every frame
+    const draw = (S) => {
+      if (S.a < 0.001 || S.p > 0.999) {
+        S.el.style.opacity = 0; S.tick.style.opacity = 0; S.ring.style.opacity = 0;
         return;
       }
-      const dur = Math.min(Math.max(Math.abs(t - tl.time()) / SPEED, 0.3), MAX_DUR);
-      player = tl.tweenTo(t, { duration: dur, ease: "none" });
+      const L = layer.getBoundingClientRect(), a = S.src.getBoundingClientRect(), b = S.cell.getBoundingClientRect();
+      const w = S.el.offsetWidth, h = S.el.offsetHeight;
+      const px = a.left + a.width / 2 - L.left, py = a.top + a.height / 2 - L.top;
+      const rx = Math.min(px + 22, L.width - w - 12), ry = Math.max(py - 22 - h, 8);
+      const tx = b.left - L.left + 4, ty = b.top - L.top + b.height / 2 - h / 2;
+      const k = S.p;
+      const x = rx + (tx - rx) * k;
+      const y = ry + (ty - ry) * k - Math.sin(Math.PI * k) * 70;
+      S.el.style.transform = `translate(${x}px, ${y}px) rotate(${(-3 * k).toFixed(2)}deg) scale(${(0.6 + 0.4 * S.a) * (1 - 0.18 * k)})`;
+      S.el.style.opacity = Math.min(S.a, (1 - k) / 0.12);
+      const tickOn = S.a * Math.max(0, 1 - k * 5);
+      S.tick.setAttribute("d", `M${px},${py} L${rx},${ry + h}`);
+      S.tick.style.opacity = tickOn;
+      S.ring.setAttribute("cx", px); S.ring.setAttribute("cy", py);
+      S.ring.style.opacity = tickOn;
     };
-    ScrollTrigger.create({
-      trigger: hero, start: "top top", end: `+=${STOPS.length * 70}%`,
-      pin: true, anticipatePin: 1,
-      onUpdate: (self) => {
-        const p = self.progress;
-        // ScrollTrigger rounds start to -0.001px, so the top of the page reads as a hair above zero
-        playTo(self.scroll() - self.start < 8 ? 0 : STOPS[Math.min(STOPS.length - 1, Math.floor(p * STOPS.length))]);
-      },
-      onRefresh: () => {
-        // re-measure function-based values (jet, runway) at the current position
-        if (player) player.kill();
-        const t = tl.time();
-        tl.time(0).invalidate().time(t);
-        if (player) player = tl.tweenTo(target, { duration: Math.min(Math.abs(target - t) / SPEED, MAX_DUR), ease: "none" });
-        drawSlips();
-      }
-    });
+    // pops off the part, holds, flies into the cell; the cell types the value as it lands
+    return (tl, src, cell, at) => {
+      const el = document.createElement("div");
+      el.className = "slip";
+      el.innerHTML = "<small></small><b></b>";
+      el.firstChild.textContent = slipLabel(cell);
+      el.lastChild.textContent = $$("[data-type]", cell).map(fullText).join(" ");
+      layer.appendChild(el);
+      const tick = svgEl("path"), ring = svgEl("circle");
+      ring.setAttribute("r", 7);
+      ticks.append(tick, ring);
+      const S = { el, tick, ring, src, cell, a: 0, p: 0 };
+      draw(S);
+      tl.to(S, { a: 1, duration: 0.3, ease: "back.out(2)", onUpdate: () => draw(S) }, at)
+        .to(S, { p: 1, duration: 0.75, ease: "power2.inOut", onUpdate: () => draw(S) }, at + 0.5);
+      fill(tl, cell, at + 1.1);
+    };
+  };
 
-    return () => {
-      if (player) player.kill();
-      $$(".cell", sheet).forEach((c) => { c.style.backgroundColor = ""; });
-      curPage = -1; showPage(0);
+  // every chapter starts from a blank page when it comes into view, holds the finished page,
+  // then plays again; it only runs while it is on screen
+  const HOLD = 3;
+  const chapter = (key, build) => {
+    const root = $(`[data-ch="${key}"]`);
+    const sheet = $(".sheet", root);
+    const pill = $("[data-status]", sheet);
+    const pill0 = [pill.textContent, pill.className];
+    typed.forEach((t) => { if (sheet.contains(t.el)) setTyped(t, 0); });
+    const tl = gsap.timeline({ paused: true, repeat: -1, repeatDelay: HOLD, defaults: { ease: "power2.inOut" } });
+    typeIn(tl, $(".sheet__head", sheet), 0, 0.4);
+    // tweens rewind on their own; what a call() set by hand is put back here
+    const slip = slipLayer($(".ch__body", root));
+    const reset = build({ root, sheet, tl, pill, cell: (sel) => $(sel, sheet), slip: (src, c, at) => slip(tl, src, c, at) });
+    tl.eventCallback("onRepeat", () => {
+      [pill.textContent, pill.className] = pill0;
+      if (reset) reset();
+    });
+    gsap.from(root, { autoAlpha: 0, y: 48, duration: 0.8, ease: "expo.out", scrollTrigger: { trigger: root, start: "top 85%", once: true } });
+    ScrollTrigger.create({ trigger: root, start: "top 70%", end: "bottom top", onToggle: (self) => (self.isActive ? tl.play() : tl.pause()) });
+  };
+  // cells that no scene event fills are typed in one after another
+  const typeRest = (tl, sheet, skip, at, step) =>
+    $$(".cell", sheet).filter((c) => $("[data-type]", c) && !skip(c)).forEach((c, i) => typeIn(tl, c, at + i * step, 0.3));
+
+  /* 1 · Preflight: tyres and oil in close-up, then the Commander signs */
+  chapter("pre", ({ root, sheet, tl, cell, pill, slip }) => {
+    const LATER = ["fuel", "nlg", "lmlg", "rmlg", "eng1", "eng2"];
+    typeRest(tl, sheet, (c) => LATER.includes(c.dataset.field), 0.2, 0.12);
+
+    // what the record already knows checks in first: QR, carried route, defects, maintenance
+    const chips = $$("[data-chips] .chip", root);
+    gsap.set(chips, { autoAlpha: 0, y: 8 });
+    tl.to(chips, { autoAlpha: 1, y: 0, stagger: 0.15, duration: 0.4, ease: "back.out(2)" }, 0.1);
+
+    // fuel: litres counted at the pump, converted to lb, the onboard bar grows with them
+    const LB_PER_L = 2116 / 1200, BEFORE = 4094;
+    const fuelL = $("[data-fuel-l]", root), fuelLb = $("[data-fuel-lb]", root), fuelOn = $("[data-fuel-on]", root);
+    const fuelUp = $("[data-fuel-up]", root);
+    const pump = { l: 0 };
+    const showFuel = () => {
+      fuelL.textContent = thousands(pump.l);
+      fuelLb.textContent = thousands(pump.l * LB_PER_L);
+      fuelOn.textContent = thousands(BEFORE + pump.l * LB_PER_L);
     };
+    showFuel();
+    gsap.set(fuelUp, { scaleX: 0 });
+    tl.to(pump, { l: 1200, duration: 1.6, ease: "power1.inOut", onUpdate: showFuel }, 0.7)
+      .to(fuelUp, { scaleX: 1, duration: 1.6, ease: "power1.inOut" }, 0.7);
+    slip(fuelOn, cell("[data-field='fuel']"), 2.3);
+
+    // tyres: NLG first, then both mains, which read the same pressure
+    const needle = { deg: needleAngle(0) };
+    const turn = () => setNeedle(needle.deg);
+    turn();
+    const tyPt = $("[data-pt='tyre']", root);
+    const oilPt = $("[data-pt='oil']", root);
+    const tyPos = $("[data-tyre-pos]", root);
+    gsap.set([tyPt, oilPt], { scale: 0, opacity: 0 });
+    tl.to(tyPt, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2)" }, 0.3)
+      .to(needle, { deg: needleAngle(120), duration: 0.6, ease: "back.out(1.4)", onUpdate: turn }, 0.4);
+    slip(tyPt, cell("[data-field='nlg']"), 1.0);
+    tl.to(needle, { deg: needleAngle(0), duration: 0.3, ease: "power2.in", onUpdate: turn }, 1.5)
+      .call(() => (tyPos.textContent = "TYRE · LH / RH MLG"), null, 1.6)
+      .to(needle, { deg: needleAngle(165), duration: 0.6, ease: "back.out(1.4)", onUpdate: turn }, 1.85);
+    slip(tyPt, cell("[data-field='lmlg']"), 2.45);
+    slip(tyPt, cell("[data-field='rmlg']"), 2.75);
+
+    // oil: ENG 1 reads full, ENG 2 takes half a quart; the can pivots on its spout
+    const level = $("[data-oil-level]", root);
+    const canEl = $("[data-can]", root);
+    const can = { x: 520, y: 120, r: 0 };
+    const setCan = () => canEl.setAttribute("transform", `translate(${can.x.toFixed(1)} ${can.y.toFixed(1)}) rotate(${can.r.toFixed(1)})`);
+    const stream = $("[data-oil-stream]", root);
+    const oilPos = $("[data-oil-pos]", root);
+    tl.to(oilPt, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2)" }, 0.5);
+    slip(oilPt, cell("[data-field='eng1']"), 1.1);
+    tl.call(() => (oilPos.textContent = "ENG 2 · OIL"), null, 1.5)
+      .to(level, { attr: { y: 178, height: 144 }, duration: 0.35 }, 1.5)
+      .to(can, { x: 332, y: 2, r: -105, duration: 0.65, onUpdate: setCan }, 1.8)
+      .to(stream, { opacity: 1, duration: 0.15 }, 2.4)
+      .to(level, { attr: { y: 150, height: 172 }, duration: 0.75, ease: "power1.inOut" }, 2.5)
+      .to(stream, { opacity: 0, duration: 0.15 }, 3.25)
+      .to(can, { x: 520, y: 120, r: 0, duration: 0.6, onUpdate: setCan }, 3.35);
+    slip(oilPt, cell("[data-field='eng2']"), 3.4);
+
+    const sig = $("[data-sig]", sheet);
+    const dot = $(".sheet__dot", sheet);
+    const len = sig.getTotalLength();
+    gsap.set(sig, { strokeDasharray: len, strokeDashoffset: len });
+    gsap.set(dot, { scale: 0 });
+    tl.to(sig, { strokeDashoffset: 0, duration: 0.8, ease: "power1.inOut" }, 4.7);
+    typeIn(tl, $(".sheet__hash", sheet), 5.3, 0.4);
+    tl.to(dot, { scale: 1, duration: 0.3, ease: "back.out(3)" }, 5.6);
+    setStatus(tl, pill, "Preflight signed", "pill--ok", 5.65);
+    return () => { tyPos.textContent = "TYRE · NLG"; oilPos.textContent = "ENG 1 · OIL"; };
+  });
+
+  /* 2 · Flight: crew and route, then each block time stamped as it happens */
+  chapter("flt", ({ root, sheet, tl, cell, pill, slip }) => {
+    typeRest(tl, sheet, (c) => c.dataset.stamp, 0.2, 0.12);
+    const jet = $("[data-scene-jet]", root);
+    const label = $("[data-flt-label]", root);
+    const time = $("[data-flt-time]", root);
+    gsap.set(jet, { xPercent: -50, yPercent: -50, x: 0, y: 0, rotate: -8 });
+
+    // the route fills from LYBE to LYTV; each stamp lights its tick, fuel burns down from ramp to cut-off
+    const track = $(".route__track", root);
+    const ticks = $$(".route__tick", root);
+    const totals = $("[data-flt-totals]", root);
+    const fuel = $("[data-flt-fuel]", root);
+    const leg = { p: 0 }, burn = { lb: 6210 };
+    const drawLeg = () => track.style.setProperty("--p", leg.p.toFixed(4));
+    const showBurn = () => (fuel.textContent = thousands(burn.lb));
+    drawLeg(); showBurn();
+    ticks.forEach((t) => t.classList.remove("is-on"));
+    gsap.set(totals, { opacity: 0 });
+    tl.to(leg, { p: 0.19, duration: 0.8, ease: "none", onUpdate: drawLeg }, 1.0)
+      .to(leg, { p: 0.87, duration: 1.0, ease: "none", onUpdate: drawLeg }, 1.8)
+      .to(leg, { p: 1, duration: 0.7, ease: "power1.out", onUpdate: drawLeg }, 2.8)
+      .to(burn, { lb: 4020, duration: 2.5, ease: "power1.inOut", onUpdate: showBurn }, 1.0)
+      .to(totals, { opacity: 1, duration: 0.4 }, 4.1);
+
+    // the readout shows the time from the record itself, so the two never disagree
+    const event = (k, name, at) => {
+      const c = cell(`[data-stamp='${k}']`);
+      const tick = ticks[["off", "to", "ldg", "on"].indexOf(k)];
+      tl.call(() => { label.textContent = name; time.textContent = `${fullText($("[data-type]", c))}Z`; tick.classList.add("is-on"); }, null, at)
+        .fromTo(time.parentElement, { opacity: 0.2 }, { opacity: 1, duration: 0.3, immediateRender: false }, at);
+      slip(tick, c, at);
+    };
+    event("off", "Block OFF", 1.0);
+    setStatus(tl, pill, "Flight in progress", "", 1.0);
+    tl.to(jet, { rotate: 0, duration: 0.8 }, 1.0);
+    event("to", "Take-Off", 1.8);
+    tl.to(jet, { scale: 1.18, "--sx": "70px", "--sy": "110px", "--sb": "36px", "--so": 0.2, duration: 1.1 }, 1.8)
+      .to(jet, { scale: 1, "--sx": "18px", "--sy": "26px", "--sb": "24px", "--so": 0.55, duration: 0.9 }, 2.6);
+    event("ldg", "Landing", 2.8);
+    event("on", "Block ON", 3.5);
+    tl.to(jet, { rotate: -8, duration: 0.8 }, 3.5);
+    setStatus(tl, pill, "Flight completed", "", 3.6);
+    slip(fuel, cell("[data-stamp='fuel']"), 3.6);
+    ["bt", "ft", "ld"].forEach((k, i) => fill(tl, cell(`[data-stamp='${k}']`), 4.7 + i * 0.2));
+    const label0 = label.textContent, time0 = time.textContent;
+
+    // the cloud deck streams past while the scene is on screen
+    const scene = $(".ch__scene", root);
+    const clouds = $$(".cloud", root).map((c, i, all) => {
+      gsap.set(c, { top: 0 });
+      return gsap.fromTo(c, { y: () => -scene.offsetHeight * 0.6 }, { y: () => scene.offsetHeight * 1.1, duration: 7, ease: "none", repeat: -1, paused: true }).progress(i / all.length);
+    });
+    ScrollTrigger.create({ trigger: scene, onToggle: (self) => clouds.forEach((t) => (self.isActive ? t.play() : t.pause())) });
+    return () => {
+      label.textContent = label0; time.textContent = time0;
+      ticks.forEach((t) => t.classList.remove("is-on"));
+    };
+  });
+
+  /* 3 · Engine: cruise readings, then engine 2 taken apart module by module */
+  chapter("eng", ({ root, sheet, tl, slip }) => {
+    const engine = $("[data-engine]", root);
+    const ex = (k) => $(`[data-ex="${k}"]`, engine);
+    const [fl, tat, oat, mach] = $$("[data-count]", root);
+    counter(tl, fl, 370, (v) => String(Math.round(v)).padStart(3, "0"), 0.2, 1.6);
+    counter(tl, tat, -34, signed, 0.2, 1.6);
+    counter(tl, oat, -55, signed, 0.2, 1.6);
+    counter(tl, mach, 0.7, (v) => v.toFixed(2), 0.2, 1.6);
+    $$("[data-field^='h-']", sheet).forEach((c, i) => slip([fl, tat, oat, mach][i], c, 1.6 + i * 0.2));
+
+    const ENG_ORDER = ["x-n1", "x-n2", "x-ff", "x-itt", "x-ot", "x-op"];
+    const pts = $$(".ex-pt", engine);
+    gsap.set(pts, { scale: 0, opacity: 0 });
+    const SPREAD = { "cowl-top": { y: -112, opacity: 0.5 }, "cowl-bot": { y: 112, opacity: 0.5 }, fan: { x: -150 }, comp: { x: -55 }, comb: { x: 18 }, turb: { x: 88 }, exh: { x: 178 }, agb: { y: 44 } };
+    Object.entries(SPREAD).forEach(([k, v], i) => tl.to(ex(k), { ...v, duration: 1, ease: "expo.inOut" }, 0.6 + i * 0.04));
+    tl.to($$(".ex-label", engine), { opacity: 1, stagger: 0.05, duration: 0.4 }, 1.4)
+      .to(pts, { scale: 1, opacity: 1, stagger: 0.05, duration: 0.3, ease: "back.out(2)" }, 1.5);
+    $$("[data-field^='x-']", sheet).forEach((c) => slip($(`[data-pt="${c.dataset.field}"]`, engine), c, 2.0 + ENG_ORDER.indexOf(c.dataset.field) * 0.3));
+    $$("[data-e1]", sheet).forEach((c, i) => typeIn(tl, c, 3.2 + i * 0.2, 0.3));
+  });
+
+  /* 4 · All Weather: CAT IIIA approach into fog, down to minimums */
+  chapter("awo", ({ root, sheet, tl, cell, slip }) => {
+    const scene = $(".ch__scene", root);
+    const runway = $("[data-runway]", root);
+    const jet = $("[data-scene-jet]", root);
+    const ra = $("[data-ra]", root);
+    const dh = $("[data-dh]", root);
+    ra.textContent = "1000 ft";
+    gsap.set(runway, { xPercent: -50, yPercent: -60.4, x: 0, y: () => -scene.offsetHeight * 1.4 });
+    gsap.set(jet, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1.15, "--sx": "96px", "--sy": "150px", "--sb": "40px", "--so": 0.16 });
+    gsap.set(dh, { opacity: 0 });
+    tl.to(runway, { y: 0, duration: 3.4, ease: "power1.out" }, 0)
+      .to(jet, { scale: 1, "--sx": "18px", "--sy": "26px", "--sb": "24px", "--so": 0.55, duration: 3.2, ease: "power1.in" }, 0.2)
+      .to($("[data-fog]", root), { opacity: 0.35, duration: 0.8 }, 2.8)
+      .to(dh, { opacity: 1, duration: 0.15 }, 2.9);
+    counter(tl, ra, 50, (v) => `${Math.round(v)} ft`, 0.3, 2.6, "power1.in");
+    typeRest(tl, sheet, (c) => c.dataset.field, 0.3, 0.3);
+    slip(ra, cell("[data-field='a-ra']"), 3.0);
+    slip($("[data-pt='a-rwy']", root), cell("[data-field='a-rwy']"), 3.4);
   });
 
   /* ---------- statement words ---------- */
@@ -691,78 +588,25 @@
   });
 
   /* ---------- lifecycle ---------- */
-  const steps = $$("[data-steps] li");
-  const tabs = $$("[data-app-tabs] span");
-  const panes = $$("[data-pane]");
-  const appStatus = $("[data-app-status]");
-  const STATUS = [["Defect open", "pill--bad"], ["Deferred · MEL C", "pill--warn"], ["Closed", "pill--ok"], ["Rectified · CRS", "pill--ok"]];
-  let cur = -1;
-  const setStep = (i) => {
-    if (i === cur) return;
-    const prev = cur;
-    cur = i;
-    steps.forEach((s, k) => { s.classList.toggle("is-on", k === i); s.classList.toggle("is-done", k < i); });
-    tabs.forEach((s, k) => s.classList.toggle("is-on", k === i));
-    appStatus.textContent = STATUS[i][0];
-    appStatus.className = `pill ${STATUS[i][1]}`;
-    panes.forEach((p, k) => {
-      if (k === i) {
-        p.classList.add("is-on");
-        const parts = $$(".row, .sign, .defect", p);
-        // scrolling back revisits a step already seen: plain crossfade, no replay of the build-up
-        if (prev > i) {
-          gsap.killTweensOf([p, ...parts]);
-          gsap.set(parts, { autoAlpha: 1, y: 0 });
-          gsap.fromTo(p, { autoAlpha: 0, y: 0 }, { autoAlpha: 1, duration: 0.25 });
-        } else {
-          gsap.fromTo(p, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "expo.out" });
-          gsap.fromTo(parts, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, stagger: 0.05, duration: 0.5, ease: "expo.out", delay: 0.08 });
-        }
-      } else if (p.classList.contains("is-on")) {
-        p.classList.remove("is-on");
-        gsap.to(p, { autoAlpha: 0, duration: 0.25 });
+  // every step is on the page at once; each card builds up as it scrolls into view,
+  // so steps that share the viewport animate side by side instead of waiting in line
+  $$("[data-steps] .life__item").forEach((item) => {
+    const card = $(".life__card", item);
+    const parts = $$(".app__bar, .defect, .row, .sign", card);
+    gsap.set(item, { autoAlpha: 0, y: 40 });
+    gsap.set(parts, { autoAlpha: 0, y: 12 });
+    ScrollTrigger.create({
+      trigger: item, start: "top 85%", once: true,
+      onEnter: () => {
+        item.classList.add("is-on");
+        gsap.to(item, { autoAlpha: 1, y: 0, duration: 0.7, ease: "expo.out" });
+        gsap.to(parts, { autoAlpha: 1, y: 0, stagger: 0.04, duration: 0.5, ease: "expo.out", delay: 0.1 });
       }
     });
-  };
-  setStep(0);
-  const stepList = $("[data-steps]");
-  const holdStepsHeight = () => {
-    stepList.style.minHeight = "";
-    const open = $("li.is-on span", stepList);
-    const cap = parseFloat(getComputedStyle(open).fontSize) * 6;
-    const collapsed = stepList.offsetHeight - open.offsetHeight;
-    const tallest = Math.max(...steps.map((li) => Math.min($("span", li).scrollHeight, cap)));
-    stepList.style.minHeight = `${collapsed + tallest}px`;
-  };
-  holdStepsHeight();
-  window.addEventListener("resize", holdStepsHeight);
-  // the rail runs dot to dot with the scroll and reaches each dot as its step turns on;
-  // dot positions are read live because the open step's text expands and shifts the ones below
-  const rail = $("[data-life-rail]");
-  let railAt = 0;
-  const dotY = (li) => li.offsetTop + parseFloat(getComputedStyle(li, "::before").top) + 4.5;
-  const drawRail = () => {
-    const k = Math.floor(railAt), f = railAt - k;
-    const y0 = dotY(steps[0]);
-    const y = k >= steps.length - 1 ? dotY(steps[steps.length - 1]) : dotY(steps[k]) + (dotY(steps[k + 1]) - dotY(steps[k])) * f;
-    rail.style.top = `${y0}px`;
-    rail.style.height = `${Math.max(y - y0, 0)}px`;
-  };
-  drawRail();
-  ScrollTrigger.create({
-    trigger: "[data-life]", start: "top top", end: "+=200%", pin: ".life__pin", scrub: true,
-    onToggle: (self) => (self.isActive ? gsap.ticker.add(drawRail) : gsap.ticker.remove(drawRail)),
-    onRefresh: drawRail,
-    onUpdate: (self) => {
-      const p = self.progress;
-      const n = steps.length;
-      setStep(Math.min(n - 1, Math.floor(p * n)));
-      railAt = Math.min(p * n, n - 1);
-    }
   });
-  gsap.from(".ipad", {
-    rotateX: 18, y: 80, scale: 0.94, transformPerspective: 1400, ease: "none",
-    scrollTrigger: { trigger: "[data-life]", start: "top 90%", end: "top top", scrub: true }
+  gsap.to("[data-life-rail]", {
+    scaleY: 1, ease: "none",
+    scrollTrigger: { trigger: "[data-steps]", start: "top 70%", end: "bottom 70%", scrub: true }
   });
 
   /* ---------- QR: auto scan when visible ---------- */
